@@ -1,0 +1,28 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class VehicleTypeSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $now = Carbon::now();
+
+        DB::table('vehicle_types')->insert([
+            [
+                'name' => 'Motor',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Mobil',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+    }
+}
