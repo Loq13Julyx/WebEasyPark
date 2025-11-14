@@ -14,14 +14,14 @@ class TarifSeeder extends Seeder
 
         DB::table('tarifs')->insert([
             [
-                'vehicle_type_id' => 1, // Motor
-                'rate'    => 2000,  // tarif awal
+                'vehicle_type_id' => 1, 
+                'rate'    => 2000,
                 'created_at'      => $now,
                 'updated_at'      => $now,
             ],
             [
-                'vehicle_type_id' => 2, // Mobil
-                'rate'    => 5000,  // tarif awal
+                'vehicle_type_id' => 2,
+                'rate'    => 5000,
                 'created_at'      => $now,
                 'updated_at'      => $now,
             ],

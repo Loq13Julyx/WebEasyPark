@@ -9,34 +9,34 @@ class ParkingAreaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Misal ID VehicleType untuk Mobil = 2
-        $vehicleTypeId = 2;
+        $vehicleTypeId = DB::table('vehicle_types')
+            ->where('name', 'Mobil')
+            ->value('id');
 
-        DB::table('parking_areas')->insert([
+        if (!$vehicleTypeId) {
+            return;
+        }
+
+        DB::table('parking_areas')->updateOrInsert(
+            ['name' => 'Area A'],
             [
-                'name' => 'Area A',
-                'location' => 'Basement 1, Near Elevator',
-                'status' => 'active',
+                'location'        => 'Basement A',
+                'status'          => 'active',
                 'vehicle_type_id' => $vehicleTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]
+        );
+
+        DB::table('parking_areas')->updateOrInsert(
+            ['name' => 'Area B'],
             [
-                'name' => 'Area B',
-                'location' => 'Ground Floor, Near Entrance',
-                'status' => 'active',
+                'location'        => 'Basement B',
+                'status'          => 'active',
                 'vehicle_type_id' => $vehicleTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Area C',
-                'location' => 'First Floor, Near Stairs',
-                'status' => 'active',
-                'vehicle_type_id' => $vehicleTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]
+        );
     }
 }

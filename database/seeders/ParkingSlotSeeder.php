@@ -12,23 +12,23 @@ class ParkingSlotSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        // Ambil semua area (misal: ['Area A' => 1, 'Area B' => 2, ...])
-        $areas = DB::table('parking_areas')->pluck('id', 'name');
+        $areaAId = DB::table('parking_areas')
+            ->where('name', 'Area A')
+            ->value('id');
+
+        $areaBId = DB::table('parking_areas')
+            ->where('name', 'Area B')
+            ->value('id');
 
         $data = [];
 
-        foreach (['A', 'B', 'C', 'D'] as $letter) {
-            $areaName = 'Area ' . $letter;
-            $areaId = $areas[$areaName] ?? null;
-
-            if (!$areaId) continue; // Skip kalau area belum ada
-
-            for ($i = 1; $i <= 3; $i++) {
+        if ($areaAId) {
+            for ($i = 1; $i <= 5; $i++) {
                 $data[] = [
-                    'area_id'             => $areaId,
-                    'slot_code'           => $letter . $i,
+                    'area_id'             => $areaAId,
+                    'slot_code'           => 'A' . $i,
                     'status'              => 'empty',
-                    'distance_from_entry' => rand(5, 50), // contoh jarak acak antara 5–50 meter
+                    'distance_from_entry' => rand(5, 50),
                     'last_update'         => $now,
                     'created_at'          => $now,
                     'updated_at'          => $now,
@@ -36,6 +36,22 @@ class ParkingSlotSeeder extends Seeder
             }
         }
 
-        DB::table('parking_slots')->insert($data);
+        if ($areaBId) {
+            for ($i = 1; $i <= 5; $i++) {
+                $data[] = [
+                    'area_id'             => $areaBId,
+                    'slot_code'           => 'B' . $i,
+                    'status'              => 'empty',
+                    'distance_from_entry' => rand(5, 50),
+                    'last_update'         => $now,
+                    'created_at'          => $now,
+                    'updated_at'          => $now,
+                ];
+            }
+        }
+
+        if (!empty($data)) {
+            DB::table('parking_slots')->insert($data);
+        }
     }
 }

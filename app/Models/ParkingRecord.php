@@ -12,8 +12,6 @@ class ParkingRecord extends Model
     protected $table = 'parking_records';
 
     protected $fillable = [
-        'parking_slot_id',
-        'vehicle_type_id',
         'tarif_id',
         'ticket_code',
         'entry_time',
@@ -26,22 +24,6 @@ class ParkingRecord extends Model
         'entry_time' => 'datetime',
         'exit_time' => 'datetime',
     ];
-
-    /**
-     * Relasi ke tabel ParkingSlot
-     */
-    public function parkingSlot()
-    {
-        return $this->belongsTo(ParkingSlot::class, 'parking_slot_id');
-    }
-
-    /**
-     * Relasi ke tabel VehicleType
-     */
-    public function vehicleType()
-    {
-        return $this->belongsTo(VehicleType::class, 'vehicle_type_id');
-    }
 
     /**
      * Relasi ke tabel Tarif

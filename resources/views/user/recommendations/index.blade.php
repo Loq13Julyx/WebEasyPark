@@ -56,6 +56,8 @@
                                     </div>
 
                                     <div class="relative z-10">
+
+                                        {{-- Status --}}
                                         <div class="absolute top-4 right-4">
                                             @if($slot->status == 'empty')
                                                 <span class="px-3 py-1 text-xs bg-green-100 text-green-800 rounded-full font-semibold flex items-center gap-1">
@@ -68,6 +70,7 @@
                                             @endif
                                         </div>
 
+                                        {{-- Info Slot --}}
                                         <h2 class="font-bold text-xl text-gray-800 mb-3 flex items-center gap-2">
                                             <i class="bi bi-grid-1x2-fill text-blue-500"></i>
                                             Slot {{ $slot->slot_code ?? $slot->name }}
@@ -81,15 +84,7 @@
                                             @endif
                                         </div>
 
-                                        @if($slot->status == 'empty')
-                                            <form action="{{ route('user.recommendations.selectSlot', $slot->id) }}" method="POST" class="mt-5 select-slot-form">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm px-4 py-3 rounded-xl w-full flex items-center justify-center gap-2">
-                                                    <i class="bi bi-pin-map-fill"></i> Pilih Slot Ini
-                                                </button>
-                                            </form>
-                                        @endif
+                                        {{-- Tombol memilih slot dihilangkan --}}
                                     </div>
                                 </div>
                             @endforeach
@@ -104,28 +99,4 @@
         @endif
     </div>
 </div>
-
-{{-- SweetAlert2 --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.querySelectorAll('.select-slot-form').forEach(form => {
-    form.addEventListener('submit', function(e){
-        e.preventDefault();
-        Swal.fire({
-            title: 'Konfirmasi',
-            text: "Apakah Anda yakin ingin memilih slot ini?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#2563EB',
-            cancelButtonColor: '#9CA3AF',
-            confirmButtonText: 'Ya, pilih slot ini',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if(result.isConfirmed){
-                form.submit();
-            }
-        });
-    });
-});
-</script>
 @endsection

@@ -28,8 +28,7 @@
                         <input type="text" id="name" name="name"
                             value="{{ old('name') }}"
                             class="form-control @error('name') is-invalid @enderror"
-                            placeholder="Contoh: Motor, Mobil, Truk">
-                        <small class="text-muted">Masukkan nama tipe kendaraan yang ingin ditambahkan.</small>
+                            placeholder="Contoh: Motor, Mobil">
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

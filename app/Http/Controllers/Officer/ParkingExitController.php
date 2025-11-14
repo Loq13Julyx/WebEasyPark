@@ -15,9 +15,11 @@ class ParkingExitController extends Controller
     {
         $search = $request->input('search');
 
-        $records = ParkingRecord::with(['parkingSlot', 'vehicleType'])
+        $records = ParkingRecord::query()
             ->where('status', 'in')
-            ->when($search, fn($q) => $q->where('ticket_code', 'like', "%{$search}%"))
+            ->when($search, fn($q) => 
+                $q->where('ticket_code', 'like', "%{$search}%")
+            )
             ->latest()
             ->paginate(10);
 
@@ -34,18 +36,14 @@ class ParkingExitController extends Controller
         }
 
         // Update exit_time dan status
-        $record->exit_time = now();
-        $record->status = 'out';
-        $record->payment_status = 'paid'; // opsional
-        $record->save();
+        $record->update([
+            'exit_time'      => now(),
+            'status'         => 'out',
+            'payment_status' => 'paid', // opsional
+        ]);
 
-        // Kosongkan slot parkir
-        if ($record->parkingSlot) {
-            $record->parkingSlot->status = 'empty';
-            $record->parkingSlot->save();
-        }
-
-        return redirect()->route('officer.parking-exit.index')
-            ->with('success', 'Kendaraan berhasil keluar dan slot parkir dikosongkan.');
+        return redirect()
+            ->route('officer.parking-exit.index')
+            ->with('success', 'Kendaraan berhasil keluar.');
     }
 }

@@ -39,12 +39,6 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.sensors.index') }}"
-                                class="{{ request()->routeIs('admin.sensors.*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i> Sensor
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{ route('admin.vehicle-types.index') }}"
                                 class="{{ request()->routeIs('admin.vehicle-types.*') ? 'active' : '' }}">
                                 <i class="bi bi-circle"></i> Tipe Kendaraan
@@ -65,9 +59,8 @@
                     </ul>
                 </li>
 
-                {{-- ================= OFFICER ================= --}}
+            {{-- ================= OFFICER ================= --}}
             @elseif($role === 'officer')
-                {{-- Dashboard Officer --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('officer/dashboard') ? 'active' : '' }}"
                         href="{{ route('officer.dashboard') }}">
@@ -85,9 +78,8 @@
                     </a>
                 </li>
 
-                {{-- ================= USER ================= --}}
+            {{-- ================= USER ================= --}}
             @elseif($role === 'user')
-                {{-- Rekomendasi Parkir --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('user/recommendations*') ? 'active' : '' }}"
                         href="{{ route('user.recommendations.index') }}">

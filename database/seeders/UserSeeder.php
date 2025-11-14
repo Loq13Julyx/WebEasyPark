@@ -11,10 +11,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil semua role dari tabel roles
         $roles = DB::table('roles')->get()->keyBy('name');
-
-        // Data default users
         $users = [
             [
                 'name' => 'System Administrator',
@@ -36,7 +33,6 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        // Loop create user
         foreach ($users as $user) {
             if (isset($roles[$user['role']])) {
                 User::create([

@@ -26,14 +26,6 @@ class ParkingSlot extends Model
     }
 
     /**
-     * Relasi ke tabel sensors (One-to-One)
-     */
-    public function sensor()
-    {
-        return $this->hasOne(Sensor::class, 'slot_id');
-    }
-
-    /**
      * Relasi ke tabel parking_records (One-to-Many)
      */
     public function parkingRecords()

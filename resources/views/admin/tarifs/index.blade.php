@@ -22,28 +22,6 @@
                 </a>
             </div>
 
-            {{-- Filter --}}
-            <form method="GET" class="row g-2 mb-3">
-                <div class="col-md-4">
-                    <select name="vehicle_type_id" class="form-select" onchange="this.form.submit()">
-                        <option value="">-- Semua Jenis Kendaraan --</option>
-                        @foreach ($vehicleTypes as $type)
-                            <option value="{{ $type->id }}" {{ request('vehicle_type_id') == $type->id ? 'selected' : '' }}>
-                                {{ $type->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Cari tarif..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-secondary w-100">
-                        <i class="bi bi-search"></i> Cari
-                    </button>
-                </div>
-            </form>
-
             {{-- Tabel daftar tarif --}}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
