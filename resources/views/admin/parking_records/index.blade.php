@@ -20,42 +20,53 @@
                     <p class="text-muted mb-0">Kelola semua data parkir di sini.</p>
                 </div>
 
-                {{-- Filter sejajar horizontal --}}
-                <form action="{{ route('admin.parking-records.index') }}" method="GET"
-                    class="d-flex align-items-center gap-2 mb-4 flex-nowrap">
+                {{-- Filter sejajar horizontal + Tombol Cetak --}}
+                <div class="d-flex align-items-center gap-2 mb-4 flex-nowrap">
 
-                    {{-- Pencarian teks dengan ikon --}}
-                    <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control border rounded-end"
-                            placeholder="Cari kode tiket..." value="{{ request('search') }}">
-                    </div>
+                    {{-- Form Filter --}}
+                    <form action="{{ route('admin.parking-records.index') }}" method="GET"
+                        class="d-flex align-items-center gap-2 flex-nowrap">
 
-                    {{-- Status Bayar --}}
-                    <select name="payment_status" class="form-select form-select-sm border rounded shadow-sm"
-                        style="width: 180px;">
-                        <option value="">Semua Status Bayar</option>
-                        <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Pembayaran
-                            Selesai</option>
-                        <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>Menunggu
-                        </option>
-                    </select>
+                        {{-- Pencarian teks --}}
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" class="form-control border rounded-end"
+                                placeholder="Cari kode tiket..." value="{{ request('search') }}">
+                        </div>
 
-                    {{-- Status Parkir --}}
-                    <select name="status" class="form-select form-select-sm border rounded shadow-sm"
-                        style="width: 180px;">
-                        <option value="">Semua Status Parkir</option>
-                        <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>Masih Parkir</option>
-                        <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>Keluar</option>
-                    </select>
+                        {{-- Status Bayar --}}
+                        <select name="payment_status" class="form-select form-select-sm border rounded shadow-sm"
+                            style="width: 180px;">
+                            <option value="">Semua Status Bayar</option>
+                            <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Pembayaran
+                                Selesai</option>
+                            <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>Menunggu
+                            </option>
+                        </select>
 
-                    {{-- Tombol Filter --}}
-                    <button type="submit" class="btn btn-sm btn-primary rounded shadow-sm px-3">Filter</button>
+                        {{-- Status Parkir --}}
+                        <select name="status" class="form-select form-select-sm border rounded shadow-sm"
+                            style="width: 180px;">
+                            <option value="">Semua Status Parkir</option>
+                            <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>Masih Parkir</option>
+                            <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>Keluar</option>
+                        </select>
 
-                    {{-- Tombol Reset --}}
-                    <a href="{{ route('admin.parking-records.index') }}"
-                        class="btn btn-sm btn-secondary rounded shadow-sm px-3">Reset</a>
-                </form>
+                        {{-- Tombol Filter --}}
+                        <button type="submit" class="btn btn-sm btn-primary rounded shadow-sm px-3">Filter</button>
+
+                        {{-- Tombol Reset --}}
+                        <a href="{{ route('admin.parking-records.index') }}"
+                            class="btn btn-sm btn-secondary rounded shadow-sm px-3">Reset</a>
+                    </form>
+
+                    {{-- Tombol Cetak Laporan --}}
+                    <a href="{{ route('admin.parking-records.print', request()->query()) }}" target="_blank"
+                        class="btn btn-sm btn-success rounded shadow-sm px-3">
+                        <i class="bi bi-printer"></i> Cetak Laporan
+                    </a>
+                </div>
+
 
                 {{-- Table --}}
                 <div class="table-responsive">

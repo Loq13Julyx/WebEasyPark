@@ -5,7 +5,7 @@
         <h1>Detail Data Parkir</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('parking-records.index') }}">Data Parkir</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.parking-records.index') }}">Data Parkir</a></li>
                 <li class="breadcrumb-item active">Detail</li>
             </ol>
         </nav>
@@ -79,11 +79,11 @@
 
                 {{-- Tombol --}}
                 <div class="mt-4 d-flex gap-2">
-                    <a href="{{ route('parking-records.edit', $record->id) }}" class="btn btn-warning text-dark">
+                    <a href="{{ route('admin.parking-records.edit', $record->id) }}" class="btn btn-warning text-dark">
                         Edit
                     </a>
 
-                    <form action="{{ route('parking-records.destroy', $record->id) }}" method="POST"
+                    <form action="{{ route('admin.parking-records.destroy', $record->id) }}" method="POST"
                         onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                         @csrf
                         @method('DELETE')
@@ -92,7 +92,7 @@
                         </button>
                     </form>
 
-                    <a href="{{ route('parking-records.index') }}" class="btn btn-secondary">Kembali</a>
+                    <a href="{{ route('admin.parking-records.index') }}" class="btn btn-secondary">Kembali</a>
                 </div>
 
             </div>

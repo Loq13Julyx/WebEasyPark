@@ -76,6 +76,7 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     // 🕒 Riwayat & Data Parkir (FULL CRUD)
     Route::resource('admin/parking-records', ParkingRecordController::class)
         ->names('admin.parking-records');
+    Route::get('/admin/parking-records/print', [ParkingRecordController::class, 'print'])->name('admin.parking-records.print');
 });
 
 
