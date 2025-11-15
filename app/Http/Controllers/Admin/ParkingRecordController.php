@@ -16,32 +16,64 @@ class ParkingRecordController extends Controller
         $query = ParkingRecord::query();
 
         // Ambil input filter
-        $search = $request->input('search');
+        $search        = $request->input('search');
         $paymentStatus = $request->input('payment_status');
-        $status = $request->input('status');
+        $status        = $request->input('status');
+        $startDate     = $request->input('start_date');
+        $endDate       = $request->input('end_date');
 
-        // Filter berdasarkan input pencarian
+        /**
+         * FILTER PENCARIAN
+         * Bisa cari ticket_code atau plate_number (opsional)
+         */
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('ticket_code', 'like', "%{$search}%")
-                    ->orWhere('plate_number', 'like', "%{$search}%"); // Bisa ditambah field lain jika perlu
+                    ->orWhere('plate_number', 'like', "%{$search}%");
             });
         }
 
-        // Filter Status Bayar
+        /**
+         * FILTER RANGE TANGGAL MASUK (created_at atau entry_time)
+         */
+        if ($startDate && $endDate) {
+            $query->whereBetween('entry_time', [
+                $startDate . " 00:00:00",
+                $endDate   . " 23:59:59"
+            ]);
+        } elseif ($startDate) {
+            $query->whereDate('entry_time', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('entry_time', '<=', $endDate);
+        }
+
+        /**
+         * FILTER STATUS PEMBAYARAN
+         */
         if ($paymentStatus) {
             $query->where('payment_status', $paymentStatus);
         }
 
-        // Filter Status Parkir
+        /**
+         * FILTER STATUS PARKIR
+         */
         if ($status) {
             $query->where('status', $status);
         }
 
-        // Urutkan terbaru dulu
-        $records = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+        // Urutkan terbaru
+        $records = $query->orderBy('id', 'DESC')
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('admin.parking_records.index', compact('records', 'search'));
+        return view('admin.parking_records.index', compact(
+            'records',
+            'search',
+            'paymentStatus',
+            'status',
+            'startDate',
+            'endDate'
+        ));
     }
 
     /**

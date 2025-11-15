@@ -29,7 +29,7 @@
                                 <th>Tarif</th>
                                 <th>Masuk</th>
                                 <th>Durasi</th>
-                                <th>Status</th>
+                                <th>Status Parkir</th>
                                 <th>Status Pembayaran</th>
                                 <th>Aksi</th>
                             </tr>
