@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\YoloController;
 use App\Http\Controllers\API\ParkingRecordController; 
-use App\Http\Controllers\Api\ParkingSlotController;   // ← tambahan controller slot
+use App\Http\Controllers\Api\ParkingSlotController;   // ← controller slot
 
 /**
  * =========================================================
@@ -21,7 +21,7 @@ Route::get('/sensorultrasonik', [YoloController::class, 'SensorUltrasonik']);
 
 // Parking Records (Publik)
 Route::get('/parking-records', [ParkingRecordController::class, 'index']);
-Route::post('/parking-records', [ParkingRecordController::class, 'store']); // masuk parkir
+Route::post('/parking-records', [ParkingRecordController::class, 'store']);
 Route::get('/parking-records/{id}', [ParkingRecordController::class, 'show']);
 
 /**
@@ -30,11 +30,14 @@ Route::get('/parking-records/{id}', [ParkingRecordController::class, 'show']);
  * =========================================================
  */
 
-// Mendapatkan data slot (mirip foto deteksi)
+// Mendapatkan semua slot (mirip data foto)
 Route::get('/parking-slots', [ParkingSlotController::class, 'index']);
 
-// Update status slot per slot_code (A1, A2, B1, dll)
+// Update status per slot
 Route::put('/parking-slots/{slot_code}/status', [ParkingSlotController::class, 'updateStatus']);
+
+// ⭐ NEW: Update banyak slot sekaligus dari YOLO (SOLUSI A)
+Route::post('/parking-slots/update', [ParkingSlotController::class, 'updateBulk']);
 
 
 /**
