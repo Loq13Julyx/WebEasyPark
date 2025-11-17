@@ -28,22 +28,20 @@ return new class extends Migration {
 
         Schema::create('parking_slots', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('area_id')
                 ->constrained('parking_areas')
                 ->onDelete('cascade');
             $table->string('slot_code', 10);
-            $table->enum('status', ['empty', 'occupied', 'inactive'])->default('empty');
+            $table->enum('status', ['empty', 'occupied'])
+                ->default('empty');
             $table->decimal('distance_from_entry', 6, 2)
                 ->nullable()
                 ->comment('Jarak slot dari gerbang masuk dalam meter');
-            $table->json('polygon')
-                ->nullable()
-                ->comment('Koordinat polygon slot parkir dalam bentuk array titik');
             $table->timestamp('last_update')
                 ->useCurrent()
                 ->useCurrentOnUpdate();
             $table->timestamps();
-
             $table->unique(['area_id', 'slot_code']);
         });
 

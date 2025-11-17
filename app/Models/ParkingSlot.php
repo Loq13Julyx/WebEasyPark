@@ -10,10 +10,10 @@ class ParkingSlot extends Model
     use HasFactory;
 
     protected $fillable = [
-        'area_id',             // foreign key
+        'area_id',             
         'slot_code',
         'status',
-        'distance_from_entry', // ✅ tambahkan jarak dari gerbang masuk
+        'distance_from_entry', 
         'last_update',
     ];
 

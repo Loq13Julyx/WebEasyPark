@@ -23,7 +23,7 @@ class ParkingSlotSeeder extends Seeder
         $data = [];
 
         if ($areaAId) {
-            for ($i = 1; $i <= 5; $i++) {
+            for ($i = 1; $i <= 6; $i++) {
                 $data[] = [
                     'area_id'             => $areaAId,
                     'slot_code'           => 'A' . $i,
@@ -37,7 +37,7 @@ class ParkingSlotSeeder extends Seeder
         }
 
         if ($areaBId) {
-            for ($i = 1; $i <= 5; $i++) {
+            for ($i = 1; $i <= 6; $i++) {
                 $data[] = [
                     'area_id'             => $areaBId,
                     'slot_code'           => 'B' . $i,
