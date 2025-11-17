@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class ParkingSlotController extends Controller
 {
-    // Menampilkan semua slot
     public function index()
     {
         $slots = ParkingSlot::with('area')->get();
@@ -23,14 +22,14 @@ class ParkingSlotController extends Controller
                 'status_label'  => match($status) {
                     'occupied' => 'terisi',
                     'empty'    => 'kosong',
-                    'inactive' => 'kosong', // ubah inactive jadi kosong
-                    default    => 'kosong'
+                    'inactive' => 'unknown',
+                    default    => 'unknown'
                 },
-                'color'         => match($status) 
+                'color'         => match($status) {
                     'occupied' => 'red',
                     'empty'    => 'green',
-                    'inactive' => 'green', // inactive jadi hijau
-                    default    => 'green'
+                    'inactive' => 'gray',
+                    default    => 'gray'
                 },
                 'distance_from_entry' => $slot->distance_from_entry,
                 'last_update'   => $slot->last_update,
@@ -40,7 +39,6 @@ class ParkingSlotController extends Controller
         return response()->json($data);
     }
 
-    // Update status satu slot
     public function updateStatus(Request $request, $slotCode)
     {
         $slot = ParkingSlot::where('slot_code', $slotCode)->first();
@@ -50,7 +48,7 @@ class ParkingSlotController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:occupied,empty'
+            'status' => 'required|in:occupied,empty,inactive'
         ]);
 
         $slot->update([
@@ -64,7 +62,6 @@ class ParkingSlotController extends Controller
         ]);
     }
 
-    // Update banyak slot sekaligus
     public function updateBulk(Request $request)
     {
         $request->validate([
@@ -75,9 +72,10 @@ class ParkingSlotController extends Controller
         $map = [
             'kosong'  => 'empty',
             'terisi'  => 'occupied',
+            'unknown' => 'inactive',
             'empty'   => 'empty',
             'occupied'=> 'occupied',
-            'inactive'=> 'empty' // inactive dianggap kosong
+            'inactive'=> 'inactive'
         ];
 
         $updatedSlots = [];
@@ -87,7 +85,7 @@ class ParkingSlotController extends Controller
             $slot = ParkingSlot::where('slot_code', $slotCode)->first();
             if (!$slot) continue;
 
-            $dbStatus = $map[$status] ?? 'empty'; // default kosong
+            $dbStatus = $map[$status] ?? 'inactive';
 
             $slot->update([
                 'status' => $dbStatus,
@@ -112,19 +110,20 @@ class ParkingSlotController extends Controller
 
         $map = [
             'kosong'  => 'empty',
-            'terisi'  => 'occupied'
+            'terisi'  => 'occupied',
+            'unknown' => 'inactive'
         ];
 
         $updatedSlots = [];
 
         foreach ($request->slots as $slotCode => $status) {
 
-            $dbStatus = $map[$status] ?? 'empty'; // default kosong
+            $dbStatus = $map[$status] ?? 'inactive';
 
             ParkingSlot::where('slot_code', $slotCode)
                 ->update([
                     'status' => $dbStatus,
-                    'last_update' => now(),
+                    'last_update' => now()
                 ]);
 
             $updatedSlots[$slotCode] = $dbStatus;
