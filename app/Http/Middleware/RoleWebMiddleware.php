@@ -9,11 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleWebMiddleware
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  mixed ...$roles
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = Auth::user();
 
-        // Jika belum login, arahkan ke login dulu
+        // Jika belum login, arahkan ke login
         if (!$user) {
             return redirect()->route('login');
         }

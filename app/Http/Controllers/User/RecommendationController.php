@@ -10,47 +10,35 @@ use Illuminate\Http\Request;
 
 class RecommendationController extends Controller
 {
-    /**
-     * Menampilkan halaman rekomendasi + layout slot parkir
-     */
     public function index(Request $request)
     {
-        $areaId = $request->get('area_id');
-        $vehicleTypeId = $request->get('vehicle_type_id'); // masih dipakai untuk filter area
-        
+        $areaId = $request->get('area_id'); // filter area
+        $vehicleTypeId = $request->get('vehicle_type_id'); // filter jenis kendaraan
+
+        // Ambil daftar area & jenis kendaraan untuk filter dropdown
+        $areas = ParkingArea::orderBy('name')->get();
+        $vehicleTypes = VehicleType::orderBy('name')->get();
 
         /**
-         * ====== DATA FILTER ======
-         */
-        $areas = ParkingArea::where('status', 'active')->get();
-        $vehicleTypes = VehicleType::all();
-
-
-        /**
-         * ====== REKOMENDASI SLOT (Paling dekat gerbang) ======
+         * ====== QUERY REKOMENDASI SLOT ======
+         * Filter area dan tipe kendaraan (jika ada)
+         * Hanya ambil slot yang kosong
+         * Urutkan berdasarkan jarak dari entry point (distance_from_entry)
          */
         $query = ParkingSlot::with('area')
-            ->whereHas('area', function ($q) use ($areaId, $vehicleTypeId) {
-                $q->where('status', 'active');
-
-                // Filter area
-                if ($areaId) {
-                    $q->where('id', $areaId);
-                }
-
-                // Jika area punya type kendaraan tertentu
-                if ($vehicleTypeId) {
-                    $q->where('vehicle_type_id', $vehicleTypeId);
-                }
+            ->when($areaId, function ($q) use ($areaId) {
+                $q->where('area_id', $areaId);
+            })
+            ->when($vehicleTypeId, function ($q) use ($vehicleTypeId) {
+                $q->where('vehicle_type_id', $vehicleTypeId);
             })
             ->where('status', 'empty')
-            ->orderByRaw('COALESCE(distance_from_entry, 9999) ASC');
+            ->orderByRaw('COALESCE(distance_from_entry, 9999) ASC'); // jarak terkecil dulu
 
-        $recommendedSlots = $query->take(10)->get();
-
+        $recommendedSlots = $query->take(10)->get(); // ambil 10 terdekat
 
         /**
-         * ====== DATA SLOT UNTUK DITAMPILKAN PADA DENAH ======
+         * ====== DATA SLOT UNTUK DENAH PARKIR ======
          * Tanpa filter → biar denah lengkap
          */
         $slots = ParkingSlot::with('area')
@@ -58,9 +46,8 @@ class RecommendationController extends Controller
             ->orderBy('slot_code')
             ->get();
 
-
         /**
-         * ========= KIRIM KE VIEW =========
+         * ====== KIRIM KE VIEW ======
          */
         return view('user.recommendations.index', compact(
             'areas',

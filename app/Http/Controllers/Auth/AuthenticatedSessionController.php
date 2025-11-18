@@ -25,29 +25,27 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        // 🔹 Arahkan ke dashboard sesuai role
         $user = Auth::user();
 
         // Pastikan user punya relasi role
         if (!$user->role) {
             Auth::logout();
-            return redirect()->route('login')->withErrors(['role' => 'Role tidak dikenali.']);
+            return redirect()->route('login')->withErrors([
+                'role' => 'Role tidak dikenali.'
+            ]);
         }
 
-        switch ($user->role->name) {
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-            case 'officer':
-                return redirect()->route('officer.dashboard');
-            case 'user':
-                return redirect()->route('user.recommendations.index'); // contoh jika ada role user
-            default:
-                Auth::logout();
-                return redirect()->route('login')->withErrors(['role' => 'Role tidak dikenali.']);
-        }
+        // Arahkan ke dashboard sesuai role
+        return match ($user->role->name) {
+            'admin'   => redirect()->route('admin.dashboard'),
+            'officer' => redirect()->route('officer.dashboard'),
+            'user'    => redirect()->route('user.recommendations.index'),
+            default   => redirect()->route('login')->withErrors([
+                'role' => 'Role tidak dikenali.'
+            ]),
+        };
     }
 
     /**
@@ -60,6 +58,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }
