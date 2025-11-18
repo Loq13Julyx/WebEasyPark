@@ -29,7 +29,7 @@ use App\Http\Controllers\User\ParkingTicketController;
 // ===============================
 // 🔸 DEFAULT REDIRECT
 // ===============================
-Route::get('/', fn() => redirect()->route('login'));
+// Route::get('/', fn() => redirect()->route('login'));
 
 
 // ========================================================================
@@ -112,9 +112,6 @@ Route::middleware(['auth', 'roleWeb:user'])
 
         Route::post('/recommendations/select-slot/{id}', [RecommendationController::class, 'selectSlot'])
             ->name('recommendations.selectSlot');
-
-        Route::get('/parking-records/{id}/ticket', [ParkingTicketController::class, 'show'])
-            ->name('parking-records.ticket');
     });
 
 
