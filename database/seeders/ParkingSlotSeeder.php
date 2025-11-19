@@ -12,23 +12,32 @@ class ParkingSlotSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        $areaAId = DB::table('parking_areas')
-            ->where('name', 'Area A')
-            ->value('id');
+        $areaAId = DB::table('parking_areas')->where('name', 'Area A')->value('id');
+        $areaBId = DB::table('parking_areas')->where('name', 'Area B')->value('id');
 
-        $areaBId = DB::table('parking_areas')
-            ->where('name', 'Area B')
-            ->value('id');
+        // DATA FIX
+        $distanceMap = [
+            1 => 42,
+            2 => 48,
+            3 => 54,
+            4 => 60,
+            5 => 66,
+            6 => 72,
+        ];
 
         $data = [];
 
+        // Generate Area A
         if ($areaAId) {
-            for ($i = 1; $i <= 6; $i++) {
+            foreach ($distanceMap as $num => $distance) {
+                $slot = "A{$num}";
+
                 $data[] = [
                     'area_id'             => $areaAId,
-                    'slot_code'           => 'A' . $i,
+                    'slot_code'           => $slot,
                     'status'              => 'empty',
-                    'distance_from_entry' => rand(5, 50),
+                    'distance_from_entry' => $distance,
+                    'route_direction'     => "Lurus, belok kiri, lalu lurus menuju slot {$slot}",
                     'last_update'         => $now,
                     'created_at'          => $now,
                     'updated_at'          => $now,
@@ -36,13 +45,17 @@ class ParkingSlotSeeder extends Seeder
             }
         }
 
+        // Generate Area B
         if ($areaBId) {
-            for ($i = 1; $i <= 6; $i++) {
+            foreach ($distanceMap as $num => $distance) {
+                $slot = "B{$num}";
+
                 $data[] = [
                     'area_id'             => $areaBId,
-                    'slot_code'           => 'B' . $i,
+                    'slot_code'           => $slot,
                     'status'              => 'empty',
-                    'distance_from_entry' => rand(5, 50),
+                    'distance_from_entry' => $distance,
+                    'route_direction'     => "Lurus, belok kiri, lalu lurus menuju slot {$slot}",
                     'last_update'         => $now,
                     'created_at'          => $now,
                     'updated_at'          => $now,

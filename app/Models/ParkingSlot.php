@@ -13,7 +13,8 @@ class ParkingSlot extends Model
         'area_id',             
         'slot_code',
         'status',
-        'distance_from_entry', 
+        'distance_from_entry',
+        'route_direction',     // 🟢 kolom baru untuk rute custom per slot
         'last_update',
     ];
 
@@ -33,6 +34,9 @@ class ParkingSlot extends Model
         return $this->hasMany(ParkingRecord::class, 'parking_slot_id');
     }
 
+    /**
+     * Relasi ke vehicle types (opsional)
+     */
     public function vehicleType()
     {
         return $this->belongsTo(VehicleType::class, 'vehicle_type_id');

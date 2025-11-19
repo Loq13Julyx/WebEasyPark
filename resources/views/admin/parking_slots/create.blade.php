@@ -20,20 +20,22 @@
                 @csrf
 
                 <div class="row g-3">
+
                     {{-- Area Parkir --}}
                     <div class="col-md-6">
                         <label for="area_id" class="form-label">
                             Area Parkir <span class="text-danger">*</span>
                         </label>
-                        <select name="area_id" id="area_id" class="form-select @error('area_id') is-invalid @enderror">
+                        <select name="area_id" id="area_id"
+                            class="form-select @error('area_id') is-invalid @enderror">
                             <option value="">-- Pilih Area --</option>
                             @foreach ($areas as $area)
-                                <option value="{{ $area->id }}" {{ old('area_id') == $area->id ? 'selected' : '' }}>
+                                <option value="{{ $area->id }}"
+                                    {{ old('area_id') == $area->id ? 'selected' : '' }}>
                                     {{ $area->name }}
                                 </option>
                             @endforeach
                         </select>
-                        <small class="text-muted">Pilih area tempat slot parkir ini berada.</small>
                         @error('area_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -44,11 +46,12 @@
                         <label for="slot_code" class="form-label">
                             Kode Slot <span class="text-danger">*</span>
                         </label>
-                        <input type="text" id="slot_code" name="slot_code"
+                        <input type="text"
+                            id="slot_code"
+                            name="slot_code"
                             value="{{ old('slot_code') }}"
                             class="form-control @error('slot_code') is-invalid @enderror"
-                            placeholder="Contoh: S01, A01, B12">
-                        <small class="text-muted">Gunakan kode unik untuk slot parkir dalam satu area.</small>
+                            placeholder="Contoh: A1, B3">
                         @error('slot_code')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -59,35 +62,55 @@
                         <label for="distance_from_entry" class="form-label">
                             Jarak dari Pintu Masuk (meter)
                         </label>
-                        <input type="number" id="distance_from_entry" name="distance_from_entry"
+                        <input type="number"
+                            id="distance_from_entry"
+                            name="distance_from_entry"
                             value="{{ old('distance_from_entry') }}"
                             class="form-control @error('distance_from_entry') is-invalid @enderror"
-                            min="0" step="0.1" placeholder="Contoh: 12.5">
-                        <small class="text-muted">Isi jarak dari pintu masuk agar sistem dapat merekomendasikan slot terdekat.</small>
+                            min="0" placeholder="Contoh: 42">
                         @error('distance_from_entry')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    {{-- Status Slot --}}
+                    {{-- Route Direction --}}
+                    <div class="col-md-6">
+                        <label for="route_direction" class="form-label">
+                            Rute Arah Menuju Slot <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                            id="route_direction"
+                            name="route_direction"
+                            value="{{ old('route_direction') }}"
+                            class="form-control @error('route_direction') is-invalid @enderror"
+                            placeholder="Contoh: Lurus, belok kiri, lalu lurus ke slot A1">
+                        <small class="text-muted">
+                            Rute dapat dibuat manual atau mengikuti format otomatis dari sistem.
+                        </small>
+                        @error('route_direction')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Status --}}
                     <div class="col-md-6">
                         <label for="status" class="form-label">
                             Status <span class="text-danger">*</span>
                         </label>
-                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
+                        <select name="status" id="status"
+                            class="form-select @error('status') is-invalid @enderror">
                             <option value="">-- Pilih Status --</option>
                             <option value="empty" {{ old('status') == 'empty' ? 'selected' : '' }}>Kosong</option>
                             <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>Terisi</option>
-                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                         </select>
-                        <small class="text-muted">Tentukan kondisi awal slot parkir.</small>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                 </div>
 
-                {{-- Tombol Aksi --}}
+                {{-- Tombol --}}
                 <div class="d-flex justify-content-end mt-4">
                     <a href="{{ route('admin.parking-slots.index') }}" class="btn btn-secondary me-2">
                         <i class="bi bi-arrow-left"></i> Kembali

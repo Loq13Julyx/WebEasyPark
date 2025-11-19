@@ -10,8 +10,7 @@ use Illuminate\Http\Request;
 class ParkingSlotController extends Controller
 {
     /**
-     * Tampilkan daftar semua slot parkir.
-     * Bisa difilter berdasarkan area.
+     * Tampilkan daftar slot parkir dengan filter area & pencarian.
      */
     public function index(Request $request)
     {
@@ -19,12 +18,10 @@ class ParkingSlotController extends Controller
 
         $query = ParkingSlot::with('area');
 
-        // Filter berdasarkan area
         if ($request->filled('area_id')) {
             $query->where('area_id', $request->area_id);
         }
 
-        // Filter berdasarkan kode slot
         if ($request->filled('search')) {
             $query->where('slot_code', 'like', '%' . $request->search . '%');
         }
@@ -52,14 +49,16 @@ class ParkingSlotController extends Controller
             'area_id'             => 'required|exists:parking_areas,id',
             'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code',
             'status'              => 'required|in:empty,occupied,inactive',
-            'distance_from_entry' => 'nullable|numeric|min:0', // validasi tambahan
+            'distance_from_entry' => 'nullable|numeric|min:0',
+            'route_direction'     => 'nullable|string|max:500',
         ]);
 
         ParkingSlot::create([
             'area_id'             => $request->area_id,
             'slot_code'           => strtoupper($request->slot_code),
             'status'              => $request->status,
-            'distance_from_entry' => $request->distance_from_entry, // disimpan ke DB
+            'distance_from_entry' => $request->distance_from_entry,
+            'route_direction'     => $request->route_direction,
         ]);
 
         return redirect()->route('admin.parking-slots.index')
@@ -85,6 +84,7 @@ class ParkingSlotController extends Controller
             'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code,' . $parking_slot->id,
             'status'              => 'required|in:empty,occupied,inactive',
             'distance_from_entry' => 'nullable|numeric|min:0',
+            'route_direction'     => 'nullable|string|max:500',
         ]);
 
         $parking_slot->update([
@@ -92,6 +92,7 @@ class ParkingSlotController extends Controller
             'slot_code'           => strtoupper($request->slot_code),
             'status'              => $request->status,
             'distance_from_entry' => $request->distance_from_entry,
+            'route_direction'     => $request->route_direction,
         ]);
 
         return redirect()->route('admin.parking-slots.index')
@@ -110,7 +111,7 @@ class ParkingSlotController extends Controller
     }
 
     /**
-     * Update cepat status slot (misalnya dari dashboard).
+     * Update status slot (quick update).
      */
     public function updateStatus(Request $request, ParkingSlot $parking_slot)
     {

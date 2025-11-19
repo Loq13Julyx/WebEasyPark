@@ -32,18 +32,29 @@ return new class extends Migration {
             $table->foreignId('area_id')
                 ->constrained('parking_areas')
                 ->onDelete('cascade');
+
             $table->string('slot_code', 10);
+
             $table->enum('status', ['empty', 'occupied'])
                 ->default('empty');
+
             $table->decimal('distance_from_entry', 6, 2)
                 ->nullable()
                 ->comment('Jarak slot dari gerbang masuk dalam meter');
+
+            $table->string('route_direction', 255)
+                ->nullable()
+                ->comment('Rute menuju slot spesifik');
+
             $table->timestamp('last_update')
                 ->useCurrent()
                 ->useCurrentOnUpdate();
+
             $table->timestamps();
+
             $table->unique(['area_id', 'slot_code']);
         });
+
 
         Schema::create('tarifs', function (Blueprint $table) {
             $table->id();

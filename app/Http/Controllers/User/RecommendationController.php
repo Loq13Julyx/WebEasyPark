@@ -12,43 +12,42 @@ class RecommendationController extends Controller
 {
     public function index(Request $request)
     {
-        $areaId = $request->get('area_id'); // filter area
-        $vehicleTypeId = $request->get('vehicle_type_id'); // filter jenis kendaraan
+        $areaId = $request->get('area_id');
+        $vehicleTypeId = $request->get('vehicle_type_id');
 
-        // Ambil daftar area & jenis kendaraan untuk filter dropdown
+        // Dropdown filter
         $areas = ParkingArea::orderBy('name')->get();
         $vehicleTypes = VehicleType::orderBy('name')->get();
 
         /**
-         * ====== QUERY REKOMENDASI SLOT ======
-         * Filter area dan tipe kendaraan (jika ada)
-         * Hanya ambil slot yang kosong
-         * Urutkan berdasarkan jarak dari entry point (distance_from_entry)
+         * ===============================
+         * REKOMENDASI SLOT KOSONG
+         * ===============================
+         * Filter area / tipe kendaraan → jika dipilih
+         * Hanya ambil slot dengan status 'empty'
+         * Urutkan jarak terkecil → terbesar
          */
-        $query = ParkingSlot::with('area')
-            ->when($areaId, function ($q) use ($areaId) {
-                $q->where('area_id', $areaId);
-            })
-            ->when($vehicleTypeId, function ($q) use ($vehicleTypeId) {
-                $q->where('vehicle_type_id', $vehicleTypeId);
-            })
+        
+        $recommendedSlots = ParkingSlot::with('area')
+            ->when($areaId, fn($q) => $q->where('area_id', $areaId))
+            ->when($vehicleTypeId, fn($q) => $q->where('vehicle_type_id', $vehicleTypeId))
             ->where('status', 'empty')
-            ->orderByRaw('COALESCE(distance_from_entry, 9999) ASC'); // jarak terkecil dulu
-
-        $recommendedSlots = $query->take(10)->get(); // ambil 10 terdekat
+            ->orderByRaw('COALESCE(distance_from_entry, 9999)')
+            ->take(10)
+            ->get();
 
         /**
-         * ====== DATA SLOT UNTUK DENAH PARKIR ======
-         * Tanpa filter → biar denah lengkap
+         * ===============================
+         * SEMUA SLOT UNTUK DENAH PARKIR
+         * ===============================
+         * Tidak boleh difilter area/vehicle type di sini
+         * Karena denah harus tetap full semua area
          */
         $slots = ParkingSlot::with('area')
             ->orderBy('area_id')
             ->orderBy('slot_code')
             ->get();
 
-        /**
-         * ====== KIRIM KE VIEW ======
-         */
         return view('user.recommendations.index', compact(
             'areas',
             'vehicleTypes',
