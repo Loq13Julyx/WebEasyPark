@@ -17,6 +17,25 @@
                     </a>
                 </li>
 
+                {{-- Manajemen User --}}
+                <li class="nav-item">
+                    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#officer-nav" role="button"
+                        aria-expanded="false" aria-controls="officer-nav">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Manajemen Petugas</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+
+                    <ul id="officer-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                        <li>
+                            <a href="{{ route('admin.officers.index') }}"
+                                class="{{ request()->routeIs('admin.officers.*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i> Data Petugas
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 {{-- Manajemen Parkir --}}
                 <li class="nav-item">
                     <a class="nav-link collapsed" data-bs-toggle="collapse" href="#parking-nav" role="button"
@@ -59,7 +78,7 @@
                     </ul>
                 </li>
 
-            {{-- ================= OFFICER ================= --}}
+                {{-- ================= OFFICER ================= --}}
             @elseif($role === 'officer')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('officer/dashboard') ? 'active' : '' }}"
@@ -78,7 +97,7 @@
                     </a>
                 </li>
 
-            {{-- ================= USER ================= --}}
+                {{-- ================= USER ================= --}}
             @elseif($role === 'user')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('user/recommendations*') ? 'active' : '' }}"

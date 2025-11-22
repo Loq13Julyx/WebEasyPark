@@ -7,7 +7,7 @@ use App\Http\Controllers\ProfileController;
 // 🔹 ADMIN CONTROLLERS
 // ===============================
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\PetugasController;
+use App\Http\Controllers\Admin\OfficerController;
 use App\Http\Controllers\Admin\ParkingAreaController;
 use App\Http\Controllers\Admin\ParkingSlotController;
 use App\Http\Controllers\Admin\TarifController;
@@ -24,96 +24,64 @@ use App\Http\Controllers\Officer\DashboardController as OfficerDashboardControll
 // 🔹 USER CONTROLLERS
 // ===============================
 use App\Http\Controllers\User\RecommendationController;
-use App\Http\Controllers\User\ParkingTicketController;
-
-// ===============================
-// 🔸 DEFAULT REDIRECT
-// ===============================
-// Route::get('/', fn() => redirect()->route('login'));
-
 
 // ========================================================================
 // 🔹 ADMIN ROUTES
 // ========================================================================
-Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
+Route::middleware(['auth', 'roleWeb:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // 🏠 Dashboard Admin
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // 👥 Data Petugas
-    Route::resource('admin/petugas', PetugasController::class)
-        ->names('admin.petugas');
-
-    Route::get('admin/petugas/{user}/detail', [PetugasController::class, 'createDetail'])
-        ->name('admin.petugas.detail.create');
-
-    Route::post('admin/petugas/{user}/detail', [PetugasController::class, 'storeDetail'])
-        ->name('admin.petugas.detail.store');
+    // 👮 CRUD Officer → user role officer
+    Route::resource('officers', OfficerController::class);
 
     // 🅿️ Area Parkir
-    Route::resource('admin/parking-areas', ParkingAreaController::class)
-        ->names('admin.parking-areas');
+    Route::resource('parking-areas', ParkingAreaController::class);
 
     // 🅿️ Slot Parkir
-    Route::resource('admin/parking-slots', ParkingSlotController::class)
-        ->names('admin.parking-slots');
-
-    Route::patch(
-        'admin/parking-slots/{parking_slot}/status',
-        [ParkingSlotController::class, 'updateStatus']
-    )
-        ->name('admin.parking-slots.updateStatus');
+    Route::resource('parking-slots', ParkingSlotController::class);
+    Route::patch('parking-slots/{parking_slot}/status', [ParkingSlotController::class, 'updateStatus'])
+        ->name('parking-slots.updateStatus');
 
     // 🚗 Tipe Kendaraan
-    Route::resource('admin/vehicle-types', VehicleTypeController::class)
-        ->names('admin.vehicle-types');
+    Route::resource('vehicle-types', VehicleTypeController::class);
 
     // 💰 Tarif Parkir
-    Route::resource('admin/tarifs', TarifController::class)
-        ->names('admin.tarifs');
+    Route::resource('tarifs', TarifController::class);
 
-    // 🕒 Riwayat & Data Parkir (FULL CRUD)
-    Route::resource('admin/parking-records', ParkingRecordController::class)
-        ->names('admin.parking-records');
-    Route::get('/admin/parking-records/print', [ParkingRecordController::class, 'print'])->name('admin.parking-records.print');
+    // 🕒 Riwayat Parkir
+    Route::resource('parking-records', ParkingRecordController::class);
+    Route::get('parking-records/print', [ParkingRecordController::class, 'print'])
+        ->name('parking-records.print');
 });
-
 
 // ========================================================================
 // 🔹 PETUGAS ROUTES
 // ========================================================================
-Route::prefix('officer')
-    ->middleware(['auth', 'roleWeb:officer'])
-    ->name('officer.')
-    ->group(function () {
+Route::middleware(['auth', 'roleWeb:officer'])->prefix('officer')->name('officer.')->group(function () {
 
-        Route::get('dashboard', [OfficerDashboardController::class, 'index'])
-            ->name('dashboard');
+    Route::get('dashboard', [OfficerDashboardController::class, 'index'])
+        ->name('dashboard');
 
-        Route::get('parking-exit', [ParkingExitController::class, 'index'])
-            ->name('parking-exit.index');
+    Route::get('parking-exit', [ParkingExitController::class, 'index'])
+        ->name('parking-exit.index');
 
-        Route::post('parking-exit/{record}/process', [ParkingExitController::class, 'processExit'])
-            ->name('parking-exit.process');
-    });
-
+    Route::post('parking-exit/{record}/process', [ParkingExitController::class, 'processExit'])
+        ->name('parking-exit.process');
+});
 
 // ========================================================================
-// 🔹 USER ROUTES
+// 🔹 USER ROUTES (Mahasiswa)
 // ========================================================================
-Route::middleware(['auth', 'roleWeb:user'])
-    ->prefix('user')
-    ->name('user.')
-    ->group(function () {
+Route::middleware(['auth', 'roleWeb:user'])->prefix('user')->name('user.')->group(function () {
 
-        Route::get('/recommendations', [RecommendationController::class, 'index'])
-            ->name('recommendations.index');
+    Route::get('recommendations', [RecommendationController::class, 'index'])
+        ->name('recommendations.index');
 
-        Route::post('/recommendations/select-slot/{id}', [RecommendationController::class, 'selectSlot'])
-            ->name('recommendations.selectSlot');
-    });
-
+    Route::post('recommendations/select-slot/{id}', [RecommendationController::class, 'selectSlot'])
+        ->name('recommendations.selectSlot');
+});
 
 // ========================================================================
 // 🔹 PROFILE ROUTES
@@ -129,7 +97,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 });
-
 
 // ========================================================================
 // 🔐 Auth Routes

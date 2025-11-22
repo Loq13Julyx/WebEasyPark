@@ -29,8 +29,7 @@
                         <input type="text" id="name" name="name"
                             value="{{ old('name', $area->name) }}"
                             class="form-control @error('name') is-invalid @enderror"
-                            placeholder="Contoh: Area A, Basement 1, Lantai 2">
-                        <small class="text-muted">Ubah nama area parkir bila diperlukan.</small>
+                            placeholder="Contoh: Area A, Area B">
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -42,8 +41,7 @@
                         <input type="text" id="location" name="location"
                             value="{{ old('location', $area->location) }}"
                             class="form-control @error('location') is-invalid @enderror"
-                            placeholder="Contoh: Sisi Timur, Basement, Dekat Gerbang Barat">
-                        <small class="text-muted">Perbarui lokasi area parkir jika terjadi perubahan posisi fisik.</small>
+                            placeholder="Contoh: Basement A, Basement B">
                         @error('location')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -64,7 +62,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <small class="text-muted">Pilih tipe kendaraan yang bisa parkir di area ini.</small>
                         @error('vehicle_type_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

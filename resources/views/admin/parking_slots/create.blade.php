@@ -51,7 +51,7 @@
                             name="slot_code"
                             value="{{ old('slot_code') }}"
                             class="form-control @error('slot_code') is-invalid @enderror"
-                            placeholder="Contoh: A1, B3">
+                            placeholder="Contoh: A1, B1">
                         @error('slot_code')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -84,9 +84,6 @@
                             value="{{ old('route_direction') }}"
                             class="form-control @error('route_direction') is-invalid @enderror"
                             placeholder="Contoh: Lurus, belok kiri, lalu lurus ke slot A1">
-                        <small class="text-muted">
-                            Rute dapat dibuat manual atau mengikuti format otomatis dari sistem.
-                        </small>
                         @error('route_direction')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

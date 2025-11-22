@@ -50,25 +50,6 @@ class ParkingAreaController extends Controller
             ->with('success', 'Area parkir berhasil ditambahkan.');
     }
 
-    public function show($id)
-    {
-        $area = ParkingArea::with(['slots.sensor', 'vehicleType'])->findOrFail($id);
-
-        $usedSlots = $area->slots->where('status', 'occupied')->count();
-        $emptySlots = $area->slots->where('status', 'empty')->count();
-        $totalSlots = $area->slots->count();
-
-        $percentageUsed = $totalSlots > 0 ? round(($usedSlots / $totalSlots) * 100, 2) : 0;
-
-        return view('admin.parking_areas.show', compact(
-            'area',
-            'usedSlots',
-            'emptySlots',
-            'totalSlots',
-            'percentageUsed'
-        ));
-    }
-
     public function edit($id)
     {
         $area = ParkingArea::findOrFail($id);

@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="pagetitle">
-    <h1>Manajemen Area Parkir</h1>
+    <h1>Manajemen Petugas</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active">Area Parkir</li>
+            <li class="breadcrumb-item active">Petugas</li>
         </ol>
     </nav>
 </div>
@@ -16,61 +16,51 @@
 
             {{-- Header --}}
             <div class="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap gap-2">
-                <h5 class="card-title mb-0">Daftar Area Parkir</h5>
-                <a href="{{ route('admin.parking-areas.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Tambah Area Parkir
+                <h5 class="card-title mb-0">Daftar Petugas</h5>
+                <a href="{{ route('admin.officers.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Tambah Petugas
                 </a>
             </div>
 
-            {{-- Tabel daftar area parkir --}}
+            {{-- Tabel daftar petugas --}}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Nama Area</th>
-                            <th>Lokasi</th>
-                            <th>Tipe Kendaraan</th>
+                            <th>Nama</th>
+                            <th>Email</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($areas as $index => $area)
-                            @php
-                                $totalSlots = $area->slots->count();
-                                $occupiedSlots = $area->slots->where('status', 'occupied')->count();
-                                $emptySlots = $area->slots->where('status', 'empty')->count();
-                            @endphp
+                        @forelse ($officers as $index => $officer)
                             <tr>
-                                <td>{{ $areas->firstItem() + $index }}</td>
-                                <td class="fw-semibold">{{ $area->name }}</td>
-                                <td>{{ $area->location ?? '-' }}</td>
-                                <td>{{ $area->vehicleType->name ?? '-' }}</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td class="fw-semibold">{{ $officer->name }}</td>
+                                <td>{{ $officer->email }}</td>
+
                                 <td class="text-center">
-                                    <a href="{{ route('admin.parking-areas.edit', $area->id) }}"
+                                    {{-- Edit --}}
+                                    <a href="{{ route('admin.officers.edit', $officer->id) }}"
                                         class="btn btn-sm btn-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
-                                    {{-- Tombol hapus --}}
+                                    {{-- Delete --}}
                                     <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                        data-id="{{ $area->id }}" title="Hapus">
+                                        data-id="{{ $officer->id }}" title="Hapus">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted">Belum ada data area parkir.</td>
+                                <td colspan="4" class="text-center text-muted">Belum ada data petugas.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
-
-            {{-- Pagination --}}
-            <div class="mt-3">
-                {{ $areas->withQueryString()->links() }}
             </div>
 
         </div>
@@ -81,21 +71,12 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Notifikasi dari session
+    // Notifikasi
     @if (session('success'))
         Swal.fire({
             icon: 'success',
             title: 'Berhasil!',
             text: @json(session('success')),
-            confirmButtonText: 'OK'
-        });
-    @endif
-
-    @if (session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: @json(session('error')),
             confirmButtonText: 'OK'
         });
     @endif
@@ -109,14 +90,14 @@
         });
     @endif
 
-    // Konfirmasi hapus area parkir
+    // Konfirmasi hapus petugas
     document.querySelectorAll('.btn-delete').forEach(button => {
         button.addEventListener('click', function() {
-            let areaId = this.dataset.id;
+            let officerId = this.dataset.id;
 
             Swal.fire({
                 title: 'Apakah kamu yakin?',
-                text: "Data area parkir akan dihapus!",
+                text: "Data petugas akan dihapus!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -125,10 +106,9 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // buat form dinamis untuk DELETE
                     let form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = `/admin/parking-areas/${areaId}`;
+                    form.action = `/admin/officers/${officerId}`;
                     form.innerHTML = `
                         @csrf
                         @method('DELETE')

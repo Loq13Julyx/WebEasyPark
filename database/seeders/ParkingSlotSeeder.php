@@ -15,7 +15,7 @@ class ParkingSlotSeeder extends Seeder
         $areaAId = DB::table('parking_areas')->where('name', 'Area A')->value('id');
         $areaBId = DB::table('parking_areas')->where('name', 'Area B')->value('id');
 
-        // DATA FIX
+        // DISTANCE FIX
         $distanceMap = [
             1 => 42,
             2 => 48,
@@ -27,17 +27,25 @@ class ParkingSlotSeeder extends Seeder
 
         $data = [];
 
-        // Generate Area A
+        // ==========================
+        // 🔵 AREA A - belok kanan
+        // ==========================
         if ($areaAId) {
             foreach ($distanceMap as $num => $distance) {
                 $slot = "A{$num}";
+
+                if ($num == 1) {
+                    $direction = "Dari pintu masuk, lanjutkan lurus kemudian belok kanan menuju slot {$slot}.";
+                } else {
+                    $direction = "Dari pintu masuk, lanjutkan lurus, lewati A1–A" . ($num - 1) . ", lalu belok kanan menuju slot {$slot}.";
+                }
 
                 $data[] = [
                     'area_id'             => $areaAId,
                     'slot_code'           => $slot,
                     'status'              => 'empty',
                     'distance_from_entry' => $distance,
-                    'route_direction'     => "Lurus, belok kiri, lalu lurus menuju slot {$slot}",
+                    'route_direction'     => $direction,
                     'last_update'         => $now,
                     'created_at'          => $now,
                     'updated_at'          => $now,
@@ -45,17 +53,25 @@ class ParkingSlotSeeder extends Seeder
             }
         }
 
-        // Generate Area B
+        // ==========================
+        // 🔴 AREA B - belok kiri
+        // ==========================
         if ($areaBId) {
             foreach ($distanceMap as $num => $distance) {
                 $slot = "B{$num}";
+
+                if ($num == 1) {
+                    $direction = "Dari pintu masuk, lanjutkan lurus kemudian belok kiri menuju slot {$slot}.";
+                } else {
+                    $direction = "Dari pintu masuk, lanjutkan lurus, lewati B1–B" . ($num - 1) . ", lalu belok kiri menuju slot {$slot}.";
+                }
 
                 $data[] = [
                     'area_id'             => $areaBId,
                     'slot_code'           => $slot,
                     'status'              => 'empty',
                     'distance_from_entry' => $distance,
-                    'route_direction'     => "Lurus, belok kiri, lalu lurus menuju slot {$slot}",
+                    'route_direction'     => $direction,
                     'last_update'         => $now,
                     'created_at'          => $now,
                     'updated_at'          => $now,
@@ -63,6 +79,7 @@ class ParkingSlotSeeder extends Seeder
             }
         }
 
+        // INSERT
         if (!empty($data)) {
             DB::table('parking_slots')->insert($data);
         }
