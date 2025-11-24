@@ -18,6 +18,8 @@ class ParkingRecord extends Model
         'exit_time',
         'payment_status',
         'status',
+        'gate_in_id',
+        'gate_out_id',
     ];
 
     protected $casts = [
@@ -31,5 +33,21 @@ class ParkingRecord extends Model
     public function tarif()
     {
         return $this->belongsTo(Tarif::class, 'tarif_id');
+    }
+
+    /**
+     * Gate tempat kendaraan masuk
+     */
+    public function gateIn()
+    {
+        return $this->belongsTo(Gate::class, 'gate_in_id');
+    }
+
+    /**
+     * Gate tempat kendaraan keluar
+     */
+    public function gateOut()
+    {
+        return $this->belongsTo(Gate::class, 'gate_out_id');
     }
 }

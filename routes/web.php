@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ParkingAreaController;
 use App\Http\Controllers\Admin\ParkingSlotController;
 use App\Http\Controllers\Admin\TarifController;
 use App\Http\Controllers\Admin\VehicleTypeController;
+use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ParkingRecordController;
 
 // ===============================
@@ -50,10 +51,13 @@ Route::middleware(['auth', 'roleWeb:admin'])->prefix('admin')->name('admin.')->g
     // 💰 Tarif Parkir
     Route::resource('tarifs', TarifController::class);
 
+    // 🚧 Gate (Masuk / Keluar)
+    Route::resource('gates', GateController::class);
+    
     // 🕒 Riwayat Parkir
-    Route::resource('parking-records', ParkingRecordController::class);
     Route::get('parking-records/print', [ParkingRecordController::class, 'print'])
-        ->name('parking-records.print');
+        ->name('parking-records.print'); // Pindahkan ke ATAS resource
+    Route::resource('parking-records', ParkingRecordController::class);
 });
 
 // ========================================================================
@@ -71,17 +75,17 @@ Route::middleware(['auth', 'roleWeb:officer'])->prefix('officer')->name('officer
         ->name('parking-exit.process');
 });
 
-// ========================================================================
-// 🔹 USER ROUTES (Mahasiswa)
-// ========================================================================
-Route::middleware(['auth', 'roleWeb:user'])->prefix('user')->name('user.')->group(function () {
+Route::middleware(['auth', 'roleWeb:user'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
 
-    Route::get('recommendations', [RecommendationController::class, 'index'])
-        ->name('recommendations.index');
+        Route::get('recommendations', [RecommendationController::class, 'index'])
+            ->name('recommendations.index');
 
-    Route::post('recommendations/select-slot/{id}', [RecommendationController::class, 'selectSlot'])
-        ->name('recommendations.selectSlot');
-});
+        Route::post('recommendations/load-data', [RecommendationController::class, 'loadData'])
+            ->name('recommendations.loadData');
+    });
 
 // ========================================================================
 // 🔹 PROFILE ROUTES

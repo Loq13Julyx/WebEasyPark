@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Manajemen Data Parkir')
+
 @section('content')
     <div class="pagetitle">
         <h1>Manajemen Data Parkir</h1>
@@ -20,27 +22,27 @@
                 </div>
 
                 {{-- Filter --}}
-                <form method="GET" class="mb-4">
+                <form method="GET" id="filterForm" class="mb-4">
                     <div class="row g-2 align-items-end">
 
                         {{-- Tanggal Mulai --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Tanggal Mulai</label>
-                            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                            <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}"
                                 class="form-control form-control-sm" style="width: 180px;">
                         </div>
 
                         {{-- Tanggal Akhir --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Tanggal Akhir</label>
-                            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                            <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}"
                                 class="form-control form-control-sm" style="width: 180px;">
                         </div>
 
                         {{-- Status Parkir --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Status Parkir</label>
-                            <select name="status" class="form-select form-select-sm" style="width: 180px;">
+                            <select name="status" id="status" class="form-select form-select-sm" style="width: 180px;">
                                 <option value="">Semua</option>
                                 <option value="in" {{ request('status') == 'in' ? 'selected' : '' }}>Sedang Parkir
                                 </option>
@@ -52,7 +54,7 @@
                         {{-- Status Pembayaran --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Status Pembayaran</label>
-                            <select name="payment_status" class="form-select form-select-sm" style="width: 180px;">
+                            <select name="payment_status" id="payment_status" class="form-select form-select-sm" style="width: 180px;">
                                 <option value="">Semua</option>
                                 <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>
                                     Pembayaran Selesai</option>
@@ -63,15 +65,13 @@
 
                         {{-- Buttons --}}
                         <div class="col-auto">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="bi bi-filter"></i>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-filter"></i> Filter
                             </button>
-                        </div>
-
-                        <div class="col-auto">
-                            <a href="{{ route('admin.parking-records.index') }}" class="btn btn-sm btn-secondary">
-                                Reset
-                            </a>
+                            <a href="{{ route('admin.parking-records.index') }}" class="btn btn-sm btn-secondary">Reset</a>
+                            <button type="button" class="btn btn-success btn-sm" id="btnPrint">
+                                <i class="bi bi-printer"></i> Print
+                            </button>
                         </div>
 
                     </div>
@@ -85,8 +85,8 @@
                                 <th>#</th>
                                 <th>Kode Tiket</th>
                                 <th>Tarif</th>
-                                <th>Waktu Masuk</th>
-                                <th>Waktu Keluar</th>
+                                <th>Masuk</th>
+                                <th>Keluar</th>
                                 <th>Status Parkir</th>
                                 <th>Status Pembayaran</th>
                                 <th class="text-center">Aksi</th>
@@ -96,17 +96,21 @@
                             @forelse ($records as $index => $record)
                                 <tr>
                                     <td>{{ $records->firstItem() + $index }}</td>
-
                                     <td class="fw-semibold">{{ $record->ticket_code }}</td>
-
+                                    <td>Rp {{ number_format($record->tarif->rate ?? 0, 0, ',', '.') }}</td>
                                     <td>
-                                        Rp {{ number_format($record->tarif->rate ?? 0, 0, ',', '.') }}
+                                        {{ $record->entry_time }}<br>
+                                        <small class="text-muted">{{ $record->gateIn->name ?? '-' }}</small>
                                     </td>
-
-                                    <td>{{ $record->entry_time }}</td>
-                                    <td>{{ $record->exit_time ?? '-' }}</td>
-
-                                    {{-- Status Parkir --}}
+                                    <td>
+                                        @if ($record->exit_time)
+                                            {{ $record->exit_time }}<br>
+                                            <small class="text-muted">{{ $record->gateOut->name ?? '-' }}</small>
+                                        @else
+                                            -<br>
+                                            <small class="text-muted">-</small>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($record->status == 'in')
                                             <span class="badge bg-warning text-dark">Sedang Parkir</span>
@@ -114,8 +118,6 @@
                                             <span class="badge bg-success">Telah Keluar</span>
                                         @endif
                                     </td>
-
-                                    {{-- Status Pembayaran --}}
                                     <td>
                                         @if ($record->payment_status == 'paid')
                                             <span class="badge bg-primary">Pembayaran Selesai</span>
@@ -123,26 +125,20 @@
                                             <span class="badge bg-danger">Menunggu Pembayaran</span>
                                         @endif
                                     </td>
-
-                                    {{-- Aksi --}}
                                     <td class="text-center">
-
                                         <a href="{{ route('admin.parking-records.show', $record->id) }}"
                                             class="btn btn-sm btn-info" title="Detail">
                                             <i class="bi bi-eye"></i>
                                         </a>
-
                                         <button type="button" class="btn btn-sm btn-danger btn-delete"
                                             data-id="{{ $record->id }}" title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </button>
-
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">
-                                        Tidak ada data parkir ditemukan.
+                                    <td colspan="8" class="text-center text-muted">Tidak ada data parkir ditemukan.
                                     </td>
                                 </tr>
                             @endforelse
@@ -163,33 +159,61 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Konfirmasi hapus
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function() {
-                let id = this.dataset.id;
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token() }}';
 
-                Swal.fire({
-                    title: 'Hapus data?',
-                    text: "Data parkir akan dihapus permanen.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Hapus',
-                    cancelButtonText: 'Batal'
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        let form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = `/admin/parking-records/${id}`;
-                        form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                })
+            // Tombol Delete
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+
+                    Swal.fire({
+                        title: 'Hapus data?',
+                        text: "Data parkir akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/admin/parking-records/${id}`;
+                            form.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Tombol Print
+            document.getElementById('btnPrint').addEventListener('click', function() {
+                const startDate = document.getElementById('start_date').value;
+                const endDate = document.getElementById('end_date').value;
+                const status = document.getElementById('status').value;
+                const paymentStatus = document.getElementById('payment_status').value;
+
+                // Build URL dengan parameter filter
+                let printUrl = '{{ route("admin.parking-records.print") }}';
+                let params = [];
+
+                if (startDate) params.push('start_date=' + startDate);
+                if (endDate) params.push('end_date=' + endDate);
+                if (status) params.push('status=' + status);
+                if (paymentStatus) params.push('payment_status=' + paymentStatus);
+
+                if (params.length > 0) {
+                    printUrl += '?' + params.join('&');
+                }
+
+                // Buka window baru untuk print
+                window.open(printUrl, '_blank');
             });
         });
     </script>

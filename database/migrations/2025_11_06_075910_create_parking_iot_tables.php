@@ -65,14 +65,37 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('gates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->string('location', 150)->nullable();
+            $table->enum('status', ['open', 'closed'])->default('closed');
+            $table->timestamps();
+        });
+
         Schema::create('parking_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tarif_id')->nullable()->constrained('tarifs')->nullOnDelete();
+            $table->foreignId('tarif_id')
+                ->nullable()
+                ->constrained('tarifs')
+                ->nullOnDelete();
             $table->string('ticket_code')->unique();
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
-            $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
-            $table->enum('status', ['in', 'out'])->default('in');
+            $table->foreignId('gate_in_id')
+                ->nullable()
+                ->constrained('gates')
+                ->nullOnDelete()
+                ->comment('Gate tempat kendaraan masuk');
+            $table->foreignId('gate_out_id')
+                ->nullable()
+                ->constrained('gates')
+                ->nullOnDelete()
+                ->comment('Gate tempat kendaraan keluar');
+            $table->enum('payment_status', ['unpaid', 'paid'])
+                ->default('unpaid');
+            $table->enum('status', ['in', 'out'])
+                ->default('in');
             $table->timestamps();
         });
     }

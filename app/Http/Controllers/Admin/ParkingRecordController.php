@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ParkingRecord;
+use App\Models\Gate;
 use Illuminate\Http\Request;
 
 class ParkingRecordController extends Controller
@@ -13,18 +14,19 @@ class ParkingRecordController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ParkingRecord::query();
+        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif']);
 
         // Ambil input filter
         $search        = $request->input('search');
         $paymentStatus = $request->input('payment_status');
         $status        = $request->input('status');
+        $gateInId      = $request->input('gate_in_id');
+        $gateOutId     = $request->input('gate_out_id');
         $startDate     = $request->input('start_date');
         $endDate       = $request->input('end_date');
 
         /**
-         * FILTER PENCARIAN
-         * Bisa cari ticket_code atau plate_number (opsional)
+         * Filter pencarian
          */
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -34,7 +36,7 @@ class ParkingRecordController extends Controller
         }
 
         /**
-         * FILTER RANGE TANGGAL MASUK (created_at atau entry_time)
+         * Filter tanggal masuk
          */
         if ($startDate && $endDate) {
             $query->whereBetween('entry_time', [
@@ -48,20 +50,37 @@ class ParkingRecordController extends Controller
         }
 
         /**
-         * FILTER STATUS PEMBAYARAN
+         * Filter gate masuk
+         */
+        if ($gateInId) {
+            $query->where('gate_in_id', $gateInId);
+        }
+
+        /**
+         * Filter gate keluar
+         */
+        if ($gateOutId) {
+            $query->where('gate_out_id', $gateOutId);
+        }
+
+        /**
+         * Filter status pembayaran
          */
         if ($paymentStatus) {
             $query->where('payment_status', $paymentStatus);
         }
 
         /**
-         * FILTER STATUS PARKIR
+         * Filter status (in/out)
          */
         if ($status) {
             $query->where('status', $status);
         }
 
-        // Urutkan terbaru
+        // Data gate untuk filter
+        $gates = Gate::orderBy('name')->get();
+
+        // Pagination
         $records = $query->orderBy('id', 'DESC')
             ->paginate(10)
             ->withQueryString();
@@ -72,93 +91,62 @@ class ParkingRecordController extends Controller
             'paymentStatus',
             'status',
             'startDate',
-            'endDate'
+            'endDate',
+            'gates',
+            'gateInId',
+            'gateOutId'
         ));
     }
 
     /**
-     * Halaman detail data parkir (tanpa relasi).
+     * Halaman detail data parkir.
      */
     public function show($id)
     {
-        $record = ParkingRecord::findOrFail($id);
+        $record = ParkingRecord::with(['gateIn', 'gateOut', 'tarif'])->findOrFail($id);
 
         return view('admin.parking_records.show', compact('record'));
     }
-
+    
     /**
-     * Halaman form edit data parkir (tanpa relasi).
+     * Print data parkir berdasarkan filter.
      */
-    public function edit($id)
-    {
-        $record = ParkingRecord::findOrFail($id);
-
-        return view('admin.parking_records.edit', compact('record'));
-    }
-
-    /**
-     * Update data parkir (tanpa relasi).
-     */
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'payment_status' => 'required|in:paid,unpaid',
-            'exit_time'     => 'nullable|date',
-        ]);
-
-        $record = ParkingRecord::findOrFail($id);
-
-        // LOGIKA OTOMATIS
-        if ($request->payment_status === 'unpaid') {
-            $status = 'in'; // belum bayar berarti masih parkir
-            $exit_time = null; // otomatis hapus waktu keluar
-        } else {
-            $status = 'out'; // bayar berarti keluar
-            $exit_time = $request->exit_time ?? now();
-        }
-
-        $record->update([
-            'payment_status' => $request->payment_status,
-            'status'         => $status,
-            'exit_time'      => $exit_time,
-        ]);
-
-        return redirect()
-            ->route('admin.parking-records.index')
-            ->with('success', 'Data parkir berhasil diperbarui.');
-    }
-
-    /**
-     * Hapus data parkir.
-     */
-    public function destroy($id)
-    {
-        $record = ParkingRecord::findOrFail($id);
-        $record->delete();
-
-        return redirect()
-            ->route('admin.parking-records.index')
-            ->with('success', 'Data parkir berhasil dihapus.');
-    }
-
     public function print(Request $request)
     {
-        $query = ParkingRecord::query();
+        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif']);
 
-        // Bisa pakai filter yang sama seperti index
-        if ($request->filled('search')) {
-            $query->where('ticket_code', 'like', "%{$request->search}%")
-                ->orWhere('plate_number', 'like', "%{$request->search}%");
+        // Filter tanggal masuk
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('entry_time', [
+                $request->start_date . " 00:00:00",
+                $request->end_date   . " 23:59:59"
+            ]);
+        } elseif ($request->filled('start_date')) {
+            $query->whereDate('entry_time', '>=', $request->start_date);
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('entry_time', '<=', $request->end_date);
         }
-        if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
-        }
+
+        // Filter status parkir
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $records = $query->orderBy('id', 'DESC')->get();
+        // Filter status pembayaran
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
 
-        return view('admin.parking_records.print', compact('records'));
+        $records = $query->orderBy('entry_time', 'DESC')->get();
+
+        // Data untuk info filter di print
+        $filters = [
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'status' => $request->status,
+            'payment_status' => $request->payment_status,
+        ];
+
+        return view('admin.parking_records.print', compact('records', 'filters'));
     }
 }
