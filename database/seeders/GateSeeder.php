@@ -13,7 +13,7 @@ class GateSeeder extends Seeder
             [
                 'name' => 'Gate Masuk',
                 'location' => 'Pintu Masuk Parkiran',
-                'status' => 'open',
+                'status' => 'closed',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

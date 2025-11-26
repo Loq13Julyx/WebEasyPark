@@ -53,7 +53,7 @@ Route::middleware(['auth', 'roleWeb:admin'])->prefix('admin')->name('admin.')->g
 
     // 🚧 Gate (Masuk / Keluar)
     Route::resource('gates', GateController::class);
-    
+
     // 🕒 Riwayat Parkir
     Route::get('parking-records/print', [ParkingRecordController::class, 'print'])
         ->name('parking-records.print'); // Pindahkan ke ATAS resource
@@ -85,6 +85,10 @@ Route::middleware(['auth', 'roleWeb:user'])
 
         Route::post('recommendations/load-data', [RecommendationController::class, 'loadData'])
             ->name('recommendations.loadData');
+
+        // PERBAIKAN: Hapus prefix 'user.' karena sudah ada di group
+        Route::post('recommendations/select-slot', [RecommendationController::class, 'selectSlot'])
+            ->name('recommendations.selectSlot');  // Bukan 'user.recommendations.selectSlot'
     });
 
 // ========================================================================

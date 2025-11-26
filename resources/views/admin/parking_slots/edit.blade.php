@@ -81,24 +81,6 @@
                         @enderror
                     </div>
 
-                    {{-- Route Direction --}}
-                    <div class="col-md-6">
-                        <label for="route_direction" class="form-label">
-                            Rute Arah Menuju Slot <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="text"
-                            id="route_direction"
-                            name="route_direction"
-                            value="{{ old('route_direction', $parking_slot->route_direction) }}"
-                            class="form-control @error('route_direction') is-invalid @enderror"
-                            placeholder="Contoh: Lurus, belok kiri, lalu lurus menuju slot A1">
-
-                        @error('route_direction')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     {{-- Status --}}
                     <div class="col-md-6">
                         <label for="status" class="form-label">

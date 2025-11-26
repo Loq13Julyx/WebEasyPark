@@ -14,7 +14,6 @@ class ParkingSlot extends Model
         'slot_code',
         'status',
         'distance_from_entry',
-        'route_direction',     // 🟢 kolom baru untuk rute custom per slot
         'last_update',
     ];
 

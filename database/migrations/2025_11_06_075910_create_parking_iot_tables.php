@@ -42,10 +42,6 @@ return new class extends Migration {
                 ->nullable()
                 ->comment('Jarak slot dari gerbang masuk dalam meter');
 
-            $table->string('route_direction', 255)
-                ->nullable()
-                ->comment('Rute menuju slot spesifik');
-
             $table->timestamp('last_update')
                 ->useCurrent()
                 ->useCurrentOnUpdate();
@@ -55,6 +51,13 @@ return new class extends Migration {
             $table->unique(['area_id', 'slot_code']);
         });
 
+        Schema::create('gates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->string('location', 150)->nullable();
+            $table->enum('status', ['open', 'closed'])->default('closed');
+            $table->timestamps();
+        });
 
         Schema::create('tarifs', function (Blueprint $table) {
             $table->id();
@@ -62,14 +65,6 @@ return new class extends Migration {
                 ->constrained('vehicle_types')
                 ->onDelete('cascade');
             $table->decimal('rate', 10, 2)->default(0);
-            $table->timestamps();
-        });
-
-        Schema::create('gates', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 100);
-            $table->string('location', 150)->nullable();
-            $table->enum('status', ['open', 'closed'])->default('closed');
             $table->timestamps();
         });
 

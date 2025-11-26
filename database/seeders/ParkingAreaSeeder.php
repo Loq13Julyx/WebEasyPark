@@ -1,4 +1,4 @@
-<?php
+<?php  
 
 namespace Database\Seeders;
 
@@ -20,7 +20,7 @@ class ParkingAreaSeeder extends Seeder
         DB::table('parking_areas')->updateOrInsert(
             ['name' => 'Area A'],
             [
-                'location'        => 'Basement A',
+                'location'        => 'Outdoor North Zone',
                 'status'          => 'active',
                 'vehicle_type_id' => $vehicleTypeId,
                 'created_at'      => now(),
@@ -31,7 +31,7 @@ class ParkingAreaSeeder extends Seeder
         DB::table('parking_areas')->updateOrInsert(
             ['name' => 'Area B'],
             [
-                'location'        => 'Basement B',
+                'location'        => 'Outdoor South Zone',
                 'status'          => 'active',
                 'vehicle_type_id' => $vehicleTypeId,
                 'created_at'      => now(),

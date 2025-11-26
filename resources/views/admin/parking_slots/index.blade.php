@@ -31,7 +31,6 @@
                                 <th>Area Parkir</th>
                                 <th>Kode Slot</th>
                                 <th>Jarak dari Pintu Masuk (m)</th>
-                                <th>Arah Rute</th>
                                 <th>Status</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
@@ -42,12 +41,7 @@
                                     <td>{{ $slots->firstItem() + $index }}</td>
                                     <td>{{ $slot->area->name ?? '-' }}</td>
                                     <td class="fw-semibold">{{ $slot->slot_code }}</td>
-                                    <td>{{ $slot->distance_from_entry ? $slot->distance_from_entry . ' m' : '-' }}</td>
-
-                                    {{-- ARAH RUTE --}}
-                                    <td style="max-width: 250px;">
-                                        {{ $slot->route_direction ?? '-' }}
-                                    </td>
+                                    <td>{{ $slot->distance_from_entry ? intval($slot->distance_from_entry) . ' m' : '-' }}</td>
 
                                     {{-- STATUS --}}
                                     <td>
@@ -72,7 +66,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">Belum ada data slot parkir.</td>
+                                    <td colspan="6" class="text-center text-muted">Belum ada data slot parkir.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -140,9 +134,9 @@
                         form.method = 'POST';
                         form.action = `/admin/parking-slots/${slotId}`;
                         form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
+                            @csrf
+                            @method('DELETE')
+                        `;
                         document.body.appendChild(form);
                         form.submit();
                     }
