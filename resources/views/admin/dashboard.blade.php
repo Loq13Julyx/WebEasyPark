@@ -170,6 +170,7 @@
 
                                     {{-- Stats --}}
                                     <div class="row g-2 mb-3">
+                                        {{-- TERSEDIA --}}
                                         <div class="col-4">
                                             <div class="text-center p-2 rounded"
                                                 style="background: rgba(40, 167, 69, 0.1);">
@@ -181,6 +182,21 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {{-- RESERVED --}}
+                                        <div class="col-4">
+                                            <div class="text-center p-2 rounded"
+                                                style="background: rgba(255, 193, 7, 0.1);">
+                                                <div class="text-warning" style="font-size: 11px; font-weight: 600;">
+                                                    <i class="bi bi-hourglass-split"></i> TERPESAN
+                                                </div>
+                                                <div class="fw-bold text-warning" style="font-size: 18px;">
+                                                    {{ $area->reserved }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- TERISI --}}
                                         <div class="col-4">
                                             <div class="text-center p-2 rounded"
                                                 style="background: rgba(220, 53, 69, 0.1);">
@@ -192,17 +208,15 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="text-center p-2 rounded"
-                                                style="background: rgba(108, 117, 125, 0.1);">
-                                                <div class="text-secondary" style="font-size: 11px; font-weight: 600;">
-                                                    <i class="bi bi-grid-3x3-gap-fill"></i> TOTAL
-                                                </div>
-                                                <div class="fw-bold text-secondary" style="font-size: 18px;">
-                                                    {{ $area->total_slots }}
-                                                </div>
-                                            </div>
-                                        </div>
+                                    </div>
+
+                                    {{-- Info Total --}}
+                                    <div class="text-center mb-3 p-2 rounded"
+                                        style="background: rgba(108, 117, 125, 0.05);">
+                                        <small class="text-muted" style="font-size: 11px;">
+                                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                                            <strong>TOTAL SLOT:</strong> {{ $area->total_slots }}
+                                        </small>
                                     </div>
 
                                     {{-- Progress Bar --}}

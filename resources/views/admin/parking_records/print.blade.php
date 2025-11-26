@@ -6,11 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Data Parkir</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: Arial, sans-serif;
@@ -26,15 +22,8 @@
             padding-bottom: 15px;
         }
 
-        .header h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            font-size: 11px;
-            color: #666;
-        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p { font-size: 11px; color: #666; }
 
         .filter-info {
             margin-bottom: 20px;
@@ -44,17 +33,8 @@
             border-radius: 4px;
         }
 
-        .filter-info h3 {
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .filter-info p {
-            font-size: 11px;
-            margin: 3px 0;
-            color: #555;
-        }
+        .filter-info h3 { font-size: 13px; margin-bottom: 8px; color: #333; }
+        .filter-info p { font-size: 11px; margin: 3px 0; color: #555; }
 
         table {
             width: 100%;
@@ -67,33 +47,21 @@
             color: #fff;
         }
 
-        table th,
-        table td {
+        table th, table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
 
-        table th {
-            font-weight: bold;
-            font-size: 11px;
-        }
-
-        table td {
-            font-size: 11px;
-        }
+        table th { font-weight: bold; font-size: 11px; }
+        table td { font-size: 11px; }
 
         table tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
 
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
 
         .badge {
             display: inline-block;
@@ -103,25 +71,10 @@
             font-weight: bold;
         }
 
-        .badge-warning {
-            background-color: #ffc107;
-            color: #000;
-        }
-
-        .badge-success {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        .badge-primary {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-            color: #fff;
-        }
+        .badge-warning { background-color: #ffc107; color: #000; }
+        .badge-success { background-color: #28a745; color: #fff; }
+        .badge-primary { background-color: #007bff; color: #fff; }
+        .badge-danger  { background-color: #dc3545; color: #fff; }
 
         .footer {
             margin-top: 30px;
@@ -136,10 +89,7 @@
             border-radius: 4px;
         }
 
-        .summary h3 {
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
+        .summary h3 { font-size: 13px; margin-bottom: 10px; }
 
         .summary-item {
             display: flex;
@@ -154,22 +104,15 @@
         }
 
         @media print {
-            body {
-                padding: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-
-            @page {
-                margin: 15mm;
-            }
+            body { padding: 0; }
+            .no-print { display: none; }
+            @page { margin: 15mm; }
         }
     </style>
 </head>
 
 <body>
+
     {{-- Header --}}
     <div class="header">
         <h1>LAPORAN DATA PARKIR</h1>
@@ -218,23 +161,33 @@
             <tr>
                 <th class="text-center" width="5%">No</th>
                 <th width="12%">Kode Tiket</th>
+                <th width="10%">Slot</th> {{-- ✅ SLOT PARKIR --}}
                 <th width="10%">Tarif</th>
                 <th width="18%">Waktu Masuk</th>
                 <th width="18%">Waktu Keluar</th>
-                <th class="text-center" width="15%">Status Parkir</th>
-                <th class="text-center" width="15%">Status Pembayaran</th>
+                <th class="text-center" width="13%">Status Parkir</th>
+                <th class="text-center" width="14%">Status Pembayaran</th>
             </tr>
         </thead>
         <tbody>
             @forelse($records as $index => $record)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
+
                     <td><strong>{{ $record->ticket_code }}</strong></td>
+
+                    {{-- ✅ SLOT PARKIR --}}
+                    <td class="text-center">
+                        {{ $record->parkingSlot->slot_code ?? $record->parkingSlot->id ?? '-' }}
+                    </td>
+
                     <td>Rp {{ number_format($record->tarif->rate ?? 0, 0, ',', '.') }}</td>
+
                     <td>
                         {{ \Carbon\Carbon::parse($record->entry_time)->format('d/m/Y H:i') }}<br>
                         <small style="color: #666;">{{ $record->gateIn->name ?? '-' }}</small>
                     </td>
+
                     <td>
                         @if ($record->exit_time)
                             {{ \Carbon\Carbon::parse($record->exit_time)->format('d/m/Y H:i') }}<br>
@@ -243,6 +196,7 @@
                             -
                         @endif
                     </td>
+
                     <td class="text-center">
                         @if ($record->status == 'in')
                             <span class="badge badge-warning">Sedang Parkir</span>
@@ -250,6 +204,7 @@
                             <span class="badge badge-success">Telah Keluar</span>
                         @endif
                     </td>
+
                     <td class="text-center">
                         @if ($record->payment_status == 'paid')
                             <span class="badge badge-primary">Selesai</span>
@@ -260,7 +215,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 20px; color: #999;">
+                    <td colspan="8" class="text-center" style="padding: 20px; color: #999;">
                         Tidak ada data parkir yang ditemukan
                     </td>
                 </tr>
@@ -294,8 +249,9 @@
             </div>
             <div class="summary-item">
                 <span>Total Pendapatan:</span>
-                <span>Rp
-                    {{ number_format($records->where('payment_status', 'paid')->sum('tarif.rate'), 0, ',', '.') }}</span>
+                <span>
+                    Rp {{ number_format($records->where('payment_status', 'paid')->sum('tarif.rate'), 0, ',', '.') }}
+                </span>
             </div>
         </div>
     @endif
@@ -305,24 +261,18 @@
         <p>Dicetak oleh: {{ auth()->user()->name ?? 'Admin' }}</p>
     </div>
 
-    {{-- Print Button (Hidden when printing) --}}
+    {{-- Print Button --}}
     <div class="no-print" style="text-align: center; margin-top: 30px;">
         <button onclick="window.print()"
             style="padding: 10px 30px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
-            <span style="margin-right: 5px;">🖨️</span> Cetak Dokumen
+            🖨️ Cetak Dokumen
         </button>
+
         <button onclick="window.close()"
             style="padding: 10px 30px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 10px;">
             Tutup
         </button>
     </div>
 
-    <script>
-        // Auto print when page loads (optional)
-        // window.onload = function() {
-        //     window.print();
-        // }
-    </script>
 </body>
-
 </html>

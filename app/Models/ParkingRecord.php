@@ -13,6 +13,7 @@ class ParkingRecord extends Model
 
     protected $fillable = [
         'tarif_id',
+        'parking_slot_id',
         'ticket_code',
         'entry_time',
         'exit_time',
@@ -28,7 +29,7 @@ class ParkingRecord extends Model
     ];
 
     /**
-     * Relasi ke tabel Tarif
+     * Relasi: ParkingRecord dimiliki oleh Tarif
      */
     public function tarif()
     {
@@ -36,7 +37,15 @@ class ParkingRecord extends Model
     }
 
     /**
-     * Gate tempat kendaraan masuk
+     * Relasi: ParkingRecord dimiliki oleh Slot Parkir
+     */
+    public function parkingSlot()
+    {
+        return $this->belongsTo(ParkingSlot::class, 'parking_slot_id');
+    }
+
+    /**
+     * Gate tempat kendaraan MASUK
      */
     public function gateIn()
     {
@@ -44,7 +53,7 @@ class ParkingRecord extends Model
     }
 
     /**
-     * Gate tempat kendaraan keluar
+     * Gate tempat kendaraan KELUAR
      */
     public function gateOut()
     {

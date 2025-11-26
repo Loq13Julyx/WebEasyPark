@@ -5,7 +5,9 @@
     <h1>Tambah Slot Parkir</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.parking-slots.index') }}">Slot Parkir</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('admin.parking-slots.index') }}">Slot Parkir</a>
+            </li>
             <li class="breadcrumb-item active">Tambah</li>
         </ol>
     </nav>
@@ -67,7 +69,8 @@
                             name="distance_from_entry"
                             value="{{ old('distance_from_entry') }}"
                             class="form-control @error('distance_from_entry') is-invalid @enderror"
-                            min="0" placeholder="Contoh: 42">
+                            min="0"
+                            placeholder="Contoh: 42">
                         @error('distance_from_entry')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -81,8 +84,15 @@
                         <select name="status" id="status"
                             class="form-select @error('status') is-invalid @enderror">
                             <option value="">-- Pilih Status --</option>
-                            <option value="empty" {{ old('status') == 'empty' ? 'selected' : '' }}>Kosong</option>
-                            <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>Terisi</option>
+                            <option value="empty" {{ old('status') == 'empty' ? 'selected' : '' }}>
+                                Kosong
+                            </option>
+                            <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>
+                                Reserved
+                            </option>
+                            <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
+                                Terisi
+                            </option>
                         </select>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>

@@ -28,25 +28,30 @@
                         {{-- Tanggal Mulai --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Tanggal Mulai</label>
-                            <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}"
+                            <input type="date" name="start_date" id="start_date"
+                                value="{{ request('start_date') }}"
                                 class="form-control form-control-sm" style="width: 180px;">
                         </div>
 
                         {{-- Tanggal Akhir --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Tanggal Akhir</label>
-                            <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}"
+                            <input type="date" name="end_date" id="end_date"
+                                value="{{ request('end_date') }}"
                                 class="form-control form-control-sm" style="width: 180px;">
                         </div>
 
                         {{-- Status Parkir --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Status Parkir</label>
-                            <select name="status" id="status" class="form-select form-select-sm" style="width: 180px;">
+                            <select name="status" id="status"
+                                class="form-select form-select-sm" style="width: 180px;">
                                 <option value="">Semua</option>
-                                <option value="in" {{ request('status') == 'in' ? 'selected' : '' }}>Sedang Parkir
+                                <option value="in" {{ request('status') == 'in' ? 'selected' : '' }}>
+                                    Sedang Parkir
                                 </option>
-                                <option value="out" {{ request('status') == 'out' ? 'selected' : '' }}>Telah Keluar
+                                <option value="out" {{ request('status') == 'out' ? 'selected' : '' }}>
+                                    Telah Keluar
                                 </option>
                             </select>
                         </div>
@@ -54,12 +59,15 @@
                         {{-- Status Pembayaran --}}
                         <div class="col-auto">
                             <label class="form-label fw-semibold small">Status Pembayaran</label>
-                            <select name="payment_status" id="payment_status" class="form-select form-select-sm" style="width: 180px;">
+                            <select name="payment_status" id="payment_status"
+                                class="form-select form-select-sm" style="width: 180px;">
                                 <option value="">Semua</option>
                                 <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>
-                                    Pembayaran Selesai</option>
+                                    Pembayaran Selesai
+                                </option>
                                 <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>
-                                    Menunggu Pembayaran</option>
+                                    Menunggu Pembayaran
+                                </option>
                             </select>
                         </div>
 
@@ -68,7 +76,10 @@
                             <button type="submit" class="btn btn-sm btn-primary">
                                 <i class="bi bi-filter"></i> Filter
                             </button>
-                            <a href="{{ route('admin.parking-records.index') }}" class="btn btn-sm btn-secondary">Reset</a>
+                            <a href="{{ route('admin.parking-records.index') }}"
+                                class="btn btn-sm btn-secondary">
+                                Reset
+                            </a>
                             <button type="button" class="btn btn-success btn-sm" id="btnPrint">
                                 <i class="bi bi-printer"></i> Print
                             </button>
@@ -84,6 +95,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Kode Tiket</th>
+                                <th>Slot</th>
                                 <th>Tarif</th>
                                 <th>Masuk</th>
                                 <th>Keluar</th>
@@ -96,41 +108,75 @@
                             @forelse ($records as $index => $record)
                                 <tr>
                                     <td>{{ $records->firstItem() + $index }}</td>
+
                                     <td class="fw-semibold">{{ $record->ticket_code }}</td>
-                                    <td>Rp {{ number_format($record->tarif->rate ?? 0, 0, ',', '.') }}</td>
+
+                                    {{-- SLOT PARKIR --}}
+                                    <td>
+                                        @if ($record->parkingSlot)
+                                            <span class="badge bg-info">
+                                                {{ $record->parkingSlot->slot_code ?? $record->parkingSlot->id }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        Rp {{ number_format($record->tarif->rate ?? 0, 0, ',', '.') }}
+                                    </td>
+
                                     <td>
                                         {{ $record->entry_time }}<br>
-                                        <small class="text-muted">{{ $record->gateIn->name ?? '-' }}</small>
+                                        <small class="text-muted">
+                                            {{ $record->gateIn->name ?? '-' }}
+                                        </small>
                                     </td>
+
                                     <td>
                                         @if ($record->exit_time)
                                             {{ $record->exit_time }}<br>
-                                            <small class="text-muted">{{ $record->gateOut->name ?? '-' }}</small>
+                                            <small class="text-muted">
+                                                {{ $record->gateOut->name ?? '-' }}
+                                            </small>
                                         @else
                                             -<br>
                                             <small class="text-muted">-</small>
                                         @endif
                                     </td>
+
                                     <td>
                                         @if ($record->status == 'in')
-                                            <span class="badge bg-warning text-dark">Sedang Parkir</span>
+                                            <span class="badge bg-warning text-dark">
+                                                Sedang Parkir
+                                            </span>
                                         @else
-                                            <span class="badge bg-success">Telah Keluar</span>
+                                            <span class="badge bg-success">
+                                                Telah Keluar
+                                            </span>
                                         @endif
                                     </td>
+
                                     <td>
                                         @if ($record->payment_status == 'paid')
-                                            <span class="badge bg-primary">Pembayaran Selesai</span>
+                                            <span class="badge bg-primary">
+                                                Pembayaran Selesai
+                                            </span>
                                         @else
-                                            <span class="badge bg-danger">Menunggu Pembayaran</span>
+                                            <span class="badge bg-danger">
+                                                Menunggu Pembayaran
+                                            </span>
                                         @endif
                                     </td>
+
                                     <td class="text-center">
                                         <a href="{{ route('admin.parking-records.show', $record->id) }}"
                                             class="btn btn-sm btn-info" title="Detail">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger btn-delete"
+
+                                        <button type="button"
+                                            class="btn btn-sm btn-danger btn-delete"
                                             data-id="{{ $record->id }}" title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -138,7 +184,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">Tidak ada data parkir ditemukan.
+                                    <td colspan="9"
+                                        class="text-center text-muted">
+                                        Tidak ada data parkir ditemukan.
                                     </td>
                                 </tr>
                             @endforelse
@@ -158,6 +206,7 @@
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const csrfToken = '{{ csrf_token() }}';
@@ -199,7 +248,6 @@
                 const status = document.getElementById('status').value;
                 const paymentStatus = document.getElementById('payment_status').value;
 
-                // Build URL dengan parameter filter
                 let printUrl = '{{ route("admin.parking-records.print") }}';
                 let params = [];
 
@@ -212,7 +260,6 @@
                     printUrl += '?' + params.join('&');
                 }
 
-                // Buka window baru untuk print
                 window.open(printUrl, '_blank');
             });
         });

@@ -35,12 +35,12 @@ return new class extends Migration {
 
             $table->string('slot_code', 10);
 
-            $table->enum('status', ['empty', 'occupied'])
+            $table->enum('status', ['empty', 'reserved', 'occupied'])
                 ->default('empty');
 
-            $table->decimal('distance_from_entry', 6, 2)
-                ->nullable()
-                ->comment('Jarak slot dari gerbang masuk dalam meter');
+            $table->timestamp('reserved_at')->nullable();
+
+            $table->decimal('distance_from_entry', 6, 2)->nullable();
 
             $table->timestamp('last_update')
                 ->useCurrent()
@@ -70,27 +70,38 @@ return new class extends Migration {
 
         Schema::create('parking_records', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('tarif_id')
                 ->nullable()
                 ->constrained('tarifs')
                 ->nullOnDelete();
+
+            $table->foreignId('parking_slot_id')
+                ->nullable()
+                ->constrained('parking_slots')
+                ->nullOnDelete();
+
             $table->string('ticket_code')->unique();
+
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
+
             $table->foreignId('gate_in_id')
                 ->nullable()
                 ->constrained('gates')
-                ->nullOnDelete()
-                ->comment('Gate tempat kendaraan masuk');
+                ->nullOnDelete();
+
             $table->foreignId('gate_out_id')
                 ->nullable()
                 ->constrained('gates')
-                ->nullOnDelete()
-                ->comment('Gate tempat kendaraan keluar');
+                ->nullOnDelete();
+
             $table->enum('payment_status', ['unpaid', 'paid'])
                 ->default('unpaid');
+
             $table->enum('status', ['in', 'out'])
                 ->default('in');
+
             $table->timestamps();
         });
     }

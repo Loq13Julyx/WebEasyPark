@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\ParkingRecord;
+use App\Models\ParkingSlot;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -15,6 +16,14 @@ class ParkingRecordSeeder extends Seeder
         $startMonth = Carbon::create(Carbon::now()->year - 1, 1, 1);
         $endMonth   = Carbon::now();
 
+        // Ambil semua slot sekali saja untuk random
+        $slotIds = ParkingSlot::pluck('id')->toArray();
+
+        if (count($slotIds) === 0) {
+            $this->command->error('Seeder gagal: parking_slots belum ada data.');
+            return;
+        }
+
         while ($startMonth->lessThanOrEqualTo($endMonth)) {
 
             // Jumlah record acak per bulan untuk variasi grafik
@@ -25,10 +34,10 @@ class ParkingRecordSeeder extends Seeder
                 // Hari acak dalam bulan
                 $day = rand(1, $startMonth->daysInMonth);
 
-                // Jam masuk acak: pagi 06-09, siang 10-15, sore 16-20 (lebih banyak pagi & sore)
+                // Jam masuk acak: pagi 06-09, siang 10-15, sore 16-20
                 $hourDistribution = rand(1, 100);
                 if ($hourDistribution <= 40) {
-                    $hour = rand(6, 9);   // pagi
+                    $hour = rand(6, 9);    // pagi
                 } elseif ($hourDistribution <= 80) {
                     $hour = rand(16, 20); // sore
                 } else {
@@ -43,18 +52,19 @@ class ParkingRecordSeeder extends Seeder
                     rand(0, 59)
                 );
 
-                // Durasi parkir lebih variatif: 1–6 jam
+                // Durasi parkir 1–6 jam
                 $exit = (clone $entry)->addHours(rand(1, 6))->addMinutes(rand(0, 59));
 
                 ParkingRecord::create([
-                    'tarif_id'       => 2,
-                    'ticket_code'    => strtoupper(Str::random(8)),
-                    'entry_time'     => $entry,
-                    'exit_time'      => $exit,
+                    'tarif_id'         => 2,
+                    'parking_slot_id' => $slotIds[array_rand($slotIds)], // ✅ RELASI SLOT
+                    'ticket_code'     => strtoupper(Str::random(8)),
+                    'entry_time'      => $entry,
+                    'exit_time'       => $exit,
                     'payment_status' => 'paid',
-                    'status'         => 'out',
-                    'gate_in_id'     => 1,
-                    'gate_out_id'    => 2,
+                    'status'          => 'out',
+                    'gate_in_id'      => 1,
+                    'gate_out_id'     => 2,
                 ]);
             }
 

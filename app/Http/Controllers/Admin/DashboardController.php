@@ -22,6 +22,7 @@ class DashboardController extends Controller
 
         $slotTerisi = ParkingSlot::where('status', 'occupied')->count();
         $slotKosong = ParkingSlot::where('status', 'empty')->count();
+        $slotReserved = ParkingSlot::where('status', 'reserved')->count(); // TAMBAHAN
         $totalSlots = ParkingSlot::count();
 
         $persentaseOccupancy = $totalSlots > 0
@@ -62,7 +63,7 @@ class DashboardController extends Controller
         }
 
         // ============================
-        // STATUS AREA PARKIR
+        // STATUS AREA PARKIR (UPDATE: TAMBAH RESERVED)
         // ============================
 
         $areaStats = ParkingArea::select(
@@ -70,6 +71,7 @@ class DashboardController extends Controller
             'parking_areas.name',
             DB::raw('COUNT(parking_slots.id) as total_slots'),
             DB::raw('SUM(CASE WHEN parking_slots.status = "occupied" THEN 1 ELSE 0 END) as occupied'),
+            DB::raw('SUM(CASE WHEN parking_slots.status = "reserved" THEN 1 ELSE 0 END) as reserved'),
             DB::raw('SUM(CASE WHEN parking_slots.status = "empty" THEN 1 ELSE 0 END) as available')
         )
             ->leftJoin('parking_slots', 'parking_slots.area_id', '=', 'parking_areas.id')
@@ -77,8 +79,9 @@ class DashboardController extends Controller
             ->groupBy('parking_areas.id', 'parking_areas.name')
             ->get()
             ->map(function ($area) {
+                // Occupancy = (occupied + reserved) / total
                 $area->occupancy_percentage = $area->total_slots > 0
-                    ? round(($area->occupied / $area->total_slots) * 100, 1)
+                    ? round((($area->occupied + $area->reserved) / $area->total_slots) * 100, 1)
                     : 0;
                 return $area;
             });
@@ -92,12 +95,6 @@ class DashboardController extends Controller
             ->orderBy('exit_time', 'desc')
             ->limit(10)
             ->get();
-
-        $pendapatanBulanIni = ParkingRecord::whereMonth('exit_time', Carbon::now()->month)
-            ->whereYear('exit_time', Carbon::now()->year)
-            ->where('payment_status', 'paid')
-            ->join('tarifs', 'tarifs.id', '=', 'parking_records.tarif_id')
-            ->sum('tarifs.rate');
 
         $pembayaranPending = ParkingRecord::where('payment_status', 'unpaid')
             ->where('status', 'in')
@@ -120,6 +117,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact(
             'user',
             'slotKosong',
+            'slotReserved', // TAMBAHAN
             'totalSlots',
             'kendaraanSedangParkir',
             'pendapatanHariIni',

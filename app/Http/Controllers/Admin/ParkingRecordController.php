@@ -14,7 +14,8 @@ class ParkingRecordController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif']);
+        // ✅ TAMBAH RELASI parkingSlot
+        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot']);
 
         // Ambil input filter
         $search        = $request->input('search');
@@ -30,8 +31,7 @@ class ParkingRecordController extends Controller
          */
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('ticket_code', 'like', "%{$search}%")
-                    ->orWhere('plate_number', 'like', "%{$search}%");
+                $q->where('ticket_code', 'like', "%{$search}%");
             });
         }
 
@@ -103,17 +103,20 @@ class ParkingRecordController extends Controller
      */
     public function show($id)
     {
-        $record = ParkingRecord::with(['gateIn', 'gateOut', 'tarif'])->findOrFail($id);
+        // ✅ TAMBAH RELASI parkingSlot
+        $record = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot'])
+            ->findOrFail($id);
 
         return view('admin.parking_records.show', compact('record'));
     }
-    
+
     /**
      * Print data parkir berdasarkan filter.
      */
     public function print(Request $request)
     {
-        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif']);
+        // ✅ TAMBAH RELASI parkingSlot
+        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot']);
 
         // Filter tanggal masuk
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -141,9 +144,9 @@ class ParkingRecordController extends Controller
 
         // Data untuk info filter di print
         $filters = [
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'status' => $request->status,
+            'start_date'     => $request->start_date,
+            'end_date'       => $request->end_date,
+            'status'         => $request->status,
             'payment_status' => $request->payment_status,
         ];
 

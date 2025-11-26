@@ -5,7 +5,9 @@
     <h1>Edit Slot Parkir</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.parking-slots.index') }}">Slot Parkir</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('admin.parking-slots.index') }}">Slot Parkir</a>
+            </li>
             <li class="breadcrumb-item active">Edit</li>
         </ol>
     </nav>
@@ -29,9 +31,7 @@
                         </label>
                         <select name="area_id" id="area_id"
                             class="form-select @error('area_id') is-invalid @enderror">
-
                             <option value="">-- Pilih Area --</option>
-
                             @foreach ($areas as $area)
                                 <option value="{{ $area->id }}"
                                     {{ old('area_id', $parking_slot->area_id) == $area->id ? 'selected' : '' }}>
@@ -39,7 +39,6 @@
                                 </option>
                             @endforeach
                         </select>
-
                         @error('area_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -56,7 +55,6 @@
                             value="{{ old('slot_code', $parking_slot->slot_code) }}"
                             class="form-control @error('slot_code') is-invalid @enderror"
                             placeholder="Contoh: A1, B1">
-
                         @error('slot_code')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -67,15 +65,13 @@
                         <label for="distance_from_entry" class="form-label">
                             Jarak dari Pintu Masuk (meter)
                         </label>
-
                         <input type="number"
                             id="distance_from_entry"
                             name="distance_from_entry"
-                            step="0.1"
+                            min="0"
                             value="{{ old('distance_from_entry', $parking_slot->distance_from_entry) }}"
                             class="form-control @error('distance_from_entry') is-invalid @enderror"
                             placeholder="Contoh: 42">
-
                         @error('distance_from_entry')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -86,14 +82,24 @@
                         <label for="status" class="form-label">
                             Status <span class="text-danger">*</span>
                         </label>
-
                         <select name="status" id="status"
                             class="form-select @error('status') is-invalid @enderror">
-
                             <option value="">-- Pilih Status --</option>
-                            <option value="empty" {{ old('status', $parking_slot->status) == 'empty' ? 'selected' : '' }}>Kosong</option>
-                            <option value="occupied" {{ old('status', $parking_slot->status) == 'occupied' ? 'selected' : '' }}>Terisi</option>
 
+                            <option value="empty"
+                                {{ old('status', $parking_slot->status) == 'empty' ? 'selected' : '' }}>
+                                Kosong
+                            </option>
+
+                            <option value="reserved"
+                                {{ old('status', $parking_slot->status) == 'reserved' ? 'selected' : '' }}>
+                                Reserved
+                            </option>
+
+                            <option value="occupied"
+                                {{ old('status', $parking_slot->status) == 'occupied' ? 'selected' : '' }}>
+                                Terisi
+                            </option>
                         </select>
 
                         @error('status')

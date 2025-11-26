@@ -24,7 +24,7 @@ class RecommendationController extends Controller
 
     public function loadData()
     {
-        $slots = ParkingSlot::with(['area.vehicleType.tarifs']) // tambahkan relasi tarifs
+        $slots = ParkingSlot::with(['area.vehicleType.tarifs'])
             ->orderBy('area_id')
             ->orderBy('slot_code')
             ->get()
@@ -35,7 +35,7 @@ class RecommendationController extends Controller
                 return [
                     'id' => $slot->id,
                     'slot_code' => $slot->slot_code,
-                    'status' => $slot->status,
+                    'status' => $slot->status, // empty, reserved, occupied
                     'distance_from_entry' => (int) $slot->distance_from_entry,
                     'last_update' => $slot->last_update,
                     'area_id' => $slot->area_id,
@@ -43,7 +43,7 @@ class RecommendationController extends Controller
                     'area_location' => $slot->area->location ?? '-',
                     'vehicle_type' => $slot->area->vehicleType->name ?? '-',
                     'vehicle_type_id' => $slot->area->vehicle_type_id ?? null,
-                    'tarif_rate' => $tarif->rate ?? 0, // TAMBAHKAN INI
+                    'tarif_rate' => $tarif->rate ?? 0,
                 ];
             });
 
@@ -65,15 +65,17 @@ class RecommendationController extends Controller
         try {
             $slot = ParkingSlot::with('area')->findOrFail($request->slot_id);
 
+            // Validasi: hanya slot kosong yang bisa dipilih
             if ($slot->status !== 'empty') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Slot sudah terisi!'
+                    'message' => 'Slot sudah terisi atau terpesan!'
                 ], 400);
             }
 
             $tarif = Tarif::findOrFail($request->tarif_id);
 
+            // Validasi: tarif harus sesuai dengan vehicle type area
             if ($slot->area->vehicle_type_id && $tarif->vehicle_type_id !== $slot->area->vehicle_type_id) {
                 return response()->json([
                     'success' => false,
@@ -81,29 +83,33 @@ class RecommendationController extends Controller
                 ], 400);
             }
 
+            // Generate ticket code
             $ticketCode = 'TKT-' . now()->format('ymd') . '-' . strtoupper(Str::random(4));
 
+            // Buat parking record
             ParkingRecord::create([
-                'tarif_id'       => $request->tarif_id,
-                'ticket_code'    => $ticketCode,
-                'entry_time'     => now(),
-                'payment_status' => 'unpaid',
-                'status'         => 'in'
+                'tarif_id'         => $request->tarif_id,
+                'parking_slot_id'  => $slot->id, // SIMPAN SLOT ID
+                'ticket_code'      => $ticketCode,
+                'entry_time'       => now(),
+                'payment_status'   => 'unpaid',
+                'status'           => 'in'
             ]);
 
-            $slot->update(['status' => 'occupied']);
+            // Update status slot menjadi RESERVED
+            $slot->update(['status' => 'reserved']);
 
             DB::commit();
 
             return response()->json([
-                'success'     => true,
-                'message'     => 'Slot berhasil dipilih!',
-                'ticket_code' => $ticketCode,
-                'slot_code'   => $slot->slot_code,
-                'area_name'   => $slot->area->name,
+                'success'       => true,
+                'message'       => 'Slot berhasil dipesan!',
+                'ticket_code'   => $ticketCode,
+                'slot_code'     => $slot->slot_code,
+                'area_name'     => $slot->area->name,
                 'area_location' => $slot->area->location,
-                'vehicle_type' => $slot->area->vehicleType->name,
-                'tarif_rate'  => $tarif->rate,
+                'vehicle_type'  => $slot->area->vehicleType->name,
+                'tarif_rate'    => $tarif->rate,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

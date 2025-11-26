@@ -48,7 +48,7 @@ class ParkingSlotController extends Controller
         $request->validate([
             'area_id'             => 'required|exists:parking_areas,id',
             'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code',
-            'status'              => 'required|in:empty,occupied,inactive',
+            'status'              => 'required|in:empty,reserved,occupied',
             'distance_from_entry' => 'nullable|numeric|min:0',
         ]);
 
@@ -80,7 +80,7 @@ class ParkingSlotController extends Controller
         $request->validate([
             'area_id'             => 'required|exists:parking_areas,id',
             'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code,' . $parking_slot->id,
-            'status'              => 'required|in:empty,occupied,inactive',
+            'status'              => 'required|in:empty,reserved,occupied',
             'distance_from_entry' => 'nullable|numeric|min:0',
         ]);
 
@@ -112,10 +112,12 @@ class ParkingSlotController extends Controller
     public function updateStatus(Request $request, ParkingSlot $parking_slot)
     {
         $request->validate([
-            'status' => 'required|in:empty,occupied,inactive',
+            'status' => 'required|in:empty,reserved,occupied',
         ]);
 
-        $parking_slot->update(['status' => $request->status]);
+        $parking_slot->update([
+            'status' => $request->status
+        ]);
 
         return back()->with('success', 'Status slot berhasil diperbarui.');
     }

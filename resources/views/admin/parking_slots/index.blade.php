@@ -41,14 +41,20 @@
                                     <td>{{ $slots->firstItem() + $index }}</td>
                                     <td>{{ $slot->area->name ?? '-' }}</td>
                                     <td class="fw-semibold">{{ $slot->slot_code }}</td>
-                                    <td>{{ $slot->distance_from_entry ? intval($slot->distance_from_entry) . ' m' : '-' }}</td>
+                                    <td>
+                                        {{ $slot->distance_from_entry !== null ? intval($slot->distance_from_entry) . ' m' : '-' }}
+                                    </td>
 
                                     {{-- STATUS --}}
                                     <td>
-                                        @if ($slot->status == 'empty')
+                                        @if ($slot->status === 'empty')
                                             <span class="badge bg-success">Kosong</span>
-                                        @else
+                                        @elseif ($slot->status === 'reserved')
+                                            <span class="badge bg-warning text-dark">Reserved</span>
+                                        @elseif ($slot->status === 'occupied')
                                             <span class="badge bg-danger">Terisi</span>
+                                        @else
+                                            <span class="badge bg-secondary">Unknown</span>
                                         @endif
                                     </td>
 
@@ -58,15 +64,19 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                            data-id="{{ $slot->id }}" title="Hapus">
+                                        <button type="button" 
+                                            class="btn btn-sm btn-danger btn-delete"
+                                            data-id="{{ $slot->id }}" 
+                                            title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">Belum ada data slot parkir.</td>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Belum ada data slot parkir.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -86,7 +96,7 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Notifikasi dari session
+        // Notifikasi sukses
         @if (session('success'))
             Swal.fire({
                 icon: 'success',
@@ -96,6 +106,7 @@
             });
         @endif
 
+        // Notifikasi error
         @if (session('error'))
             Swal.fire({
                 icon: 'error',
@@ -105,6 +116,7 @@
             });
         @endif
 
+        // Notifikasi validasi
         @if ($errors->any())
             Swal.fire({
                 icon: 'error',
