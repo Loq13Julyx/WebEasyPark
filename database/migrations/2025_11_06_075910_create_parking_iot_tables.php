@@ -51,14 +51,6 @@ return new class extends Migration {
             $table->unique(['area_id', 'slot_code']);
         });
 
-        Schema::create('gates', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 100);
-            $table->string('location', 150)->nullable();
-            $table->enum('status', ['open', 'closed'])->default('closed');
-            $table->timestamps();
-        });
-
         Schema::create('tarifs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_type_id')
@@ -86,16 +78,6 @@ return new class extends Migration {
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
 
-            $table->foreignId('gate_in_id')
-                ->nullable()
-                ->constrained('gates')
-                ->nullOnDelete();
-
-            $table->foreignId('gate_out_id')
-                ->nullable()
-                ->constrained('gates')
-                ->nullOnDelete();
-
             $table->enum('payment_status', ['unpaid', 'paid'])
                 ->default('unpaid');
 
@@ -110,8 +92,8 @@ return new class extends Migration {
     {
         Schema::dropIfExists('parking_records');
         Schema::dropIfExists('tarifs');
-        Schema::dropIfExists('vehicle_types');
         Schema::dropIfExists('parking_slots');
         Schema::dropIfExists('parking_areas');
+        Schema::dropIfExists('vehicle_types');
     }
 };

@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\ParkingAreaController;
 use App\Http\Controllers\Admin\ParkingSlotController;
 use App\Http\Controllers\Admin\TarifController;
 use App\Http\Controllers\Admin\VehicleTypeController;
-use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ParkingRecordController;
 
 // ===============================
@@ -50,9 +49,6 @@ Route::middleware(['auth', 'roleWeb:admin'])->prefix('admin')->name('admin.')->g
 
     // 💰 Tarif Parkir
     Route::resource('tarifs', TarifController::class);
-
-    // 🚧 Gate (Masuk / Keluar)
-    Route::resource('gates', GateController::class);
 
     // 🕒 Riwayat Parkir
     Route::get('parking-records/print', [ParkingRecordController::class, 'print'])

@@ -63,14 +63,6 @@
                             </a>
                         </li>
 
-                        {{-- Gate --}}
-                        <li>
-                            <a href="{{ route('admin.gates.index') }}"
-                                class="{{ request()->routeIs('admin.gates.*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i> Gate
-                            </a>
-                        </li>
-
                         {{-- Tipe Kendaraan --}}
                         <li>
                             <a href="{{ route('admin.vehicle-types.index') }}"

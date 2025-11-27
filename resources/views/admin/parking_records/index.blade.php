@@ -127,22 +127,11 @@
                                     </td>
 
                                     <td>
-                                        {{ $record->entry_time }}<br>
-                                        <small class="text-muted">
-                                            {{ $record->gateIn->name ?? '-' }}
-                                        </small>
+                                        {{ $record->entry_time ? \Carbon\Carbon::parse($record->entry_time)->format('d/m/Y H:i') : '-' }}
                                     </td>
 
                                     <td>
-                                        @if ($record->exit_time)
-                                            {{ $record->exit_time }}<br>
-                                            <small class="text-muted">
-                                                {{ $record->gateOut->name ?? '-' }}
-                                            </small>
-                                        @else
-                                            -<br>
-                                            <small class="text-muted">-</small>
-                                        @endif
+                                        {{ $record->exit_time ? \Carbon\Carbon::parse($record->exit_time)->format('d/m/Y H:i') : '-' }}
                                     </td>
 
                                     <td>

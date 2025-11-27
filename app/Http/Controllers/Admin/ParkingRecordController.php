@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ParkingRecord;
-use App\Models\Gate;
 use Illuminate\Http\Request;
 
 class ParkingRecordController extends Controller
@@ -15,14 +14,12 @@ class ParkingRecordController extends Controller
     public function index(Request $request)
     {
         // ✅ TAMBAH RELASI parkingSlot
-        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot']);
+        $query = ParkingRecord::with(['tarif', 'parkingSlot']);
 
         // Ambil input filter
         $search        = $request->input('search');
         $paymentStatus = $request->input('payment_status');
         $status        = $request->input('status');
-        $gateInId      = $request->input('gate_in_id');
-        $gateOutId     = $request->input('gate_out_id');
         $startDate     = $request->input('start_date');
         $endDate       = $request->input('end_date');
 
@@ -50,20 +47,6 @@ class ParkingRecordController extends Controller
         }
 
         /**
-         * Filter gate masuk
-         */
-        if ($gateInId) {
-            $query->where('gate_in_id', $gateInId);
-        }
-
-        /**
-         * Filter gate keluar
-         */
-        if ($gateOutId) {
-            $query->where('gate_out_id', $gateOutId);
-        }
-
-        /**
          * Filter status pembayaran
          */
         if ($paymentStatus) {
@@ -77,9 +60,6 @@ class ParkingRecordController extends Controller
             $query->where('status', $status);
         }
 
-        // Data gate untuk filter
-        $gates = Gate::orderBy('name')->get();
-
         // Pagination
         $records = $query->orderBy('id', 'DESC')
             ->paginate(10)
@@ -91,10 +71,7 @@ class ParkingRecordController extends Controller
             'paymentStatus',
             'status',
             'startDate',
-            'endDate',
-            'gates',
-            'gateInId',
-            'gateOutId'
+            'endDate'
         ));
     }
 
@@ -104,7 +81,7 @@ class ParkingRecordController extends Controller
     public function show($id)
     {
         // ✅ TAMBAH RELASI parkingSlot
-        $record = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot'])
+        $record = ParkingRecord::with(['tarif', 'parkingSlot'])
             ->findOrFail($id);
 
         return view('admin.parking_records.show', compact('record'));
@@ -116,7 +93,7 @@ class ParkingRecordController extends Controller
     public function print(Request $request)
     {
         // ✅ TAMBAH RELASI parkingSlot
-        $query = ParkingRecord::with(['gateIn', 'gateOut', 'tarif', 'parkingSlot']);
+        $query = ParkingRecord::with(['tarif', 'parkingSlot']);
 
         // Filter tanggal masuk
         if ($request->filled('start_date') && $request->filled('end_date')) {

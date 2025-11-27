@@ -56,15 +56,13 @@ class ParkingRecordSeeder extends Seeder
                 $exit = (clone $entry)->addHours(rand(1, 6))->addMinutes(rand(0, 59));
 
                 ParkingRecord::create([
-                    'tarif_id'         => 2,
-                    'parking_slot_id' => $slotIds[array_rand($slotIds)], // ✅ RELASI SLOT
+                    'tarif_id'        => 2,
+                    'parking_slot_id' => $slotIds[array_rand($slotIds)],
                     'ticket_code'     => strtoupper(Str::random(8)),
                     'entry_time'      => $entry,
                     'exit_time'       => $exit,
-                    'payment_status' => 'paid',
+                    'payment_status'  => 'paid',
                     'status'          => 'out',
-                    'gate_in_id'      => 1,
-                    'gate_out_id'     => 2,
                 ]);
             }
 
