@@ -12,11 +12,10 @@ class ParkingRecordSeeder extends Seeder
 {
     public function run()
     {
-        // Rentang bulan: Januari tahun kemarin -> bulan sekarang
-        $startMonth = Carbon::create(Carbon::now()->year - 1, 1, 1);
-        $endMonth   = Carbon::now();
+        // Mulai dari 1 Januari tahun lalu sampai KEMARIN (bukan hari ini)
+        $startDate = Carbon::create(Carbon::now()->year - 1, 1, 1)->startOfDay();
+        $endDate   = Carbon::yesterday()->endOfDay(); // ✅ dibatasi sampai kemarin
 
-        // Ambil semua slot sekali saja untuk random
         $slotIds = ParkingSlot::pluck('id')->toArray();
 
         if (count($slotIds) === 0) {
@@ -24,17 +23,14 @@ class ParkingRecordSeeder extends Seeder
             return;
         }
 
-        while ($startMonth->lessThanOrEqualTo($endMonth)) {
+        while ($startDate->lessThanOrEqualTo($endDate)) {
 
-            // Jumlah record acak per bulan untuk variasi grafik
-            $recordsCount = rand(400, 500);
+            // Jumlah kendaraan per HARI
+            $recordsPerDay = rand(10, 25);
 
-            for ($i = 0; $i < $recordsCount; $i++) {
+            for ($i = 0; $i < $recordsPerDay; $i++) {
 
-                // Hari acak dalam bulan
-                $day = rand(1, $startMonth->daysInMonth);
-
-                // Jam masuk acak: pagi 06-09, siang 10-15, sore 16-20
+                // Distribusi jam masuk
                 $hourDistribution = rand(1, 100);
                 if ($hourDistribution <= 40) {
                     $hour = rand(6, 9);    // pagi
@@ -45,15 +41,16 @@ class ParkingRecordSeeder extends Seeder
                 }
 
                 $entry = Carbon::create(
-                    $startMonth->year,
-                    $startMonth->month,
-                    $day,
+                    $startDate->year,
+                    $startDate->month,
+                    $startDate->day,
                     $hour,
                     rand(0, 59)
                 );
 
-                // Durasi parkir 1–6 jam
-                $exit = (clone $entry)->addHours(rand(1, 6))->addMinutes(rand(0, 59));
+                $exit = (clone $entry)
+                    ->addHours(rand(1, 6))
+                    ->addMinutes(rand(0, 59));
 
                 ParkingRecord::create([
                     'tarif_id'        => 2,
@@ -66,7 +63,8 @@ class ParkingRecordSeeder extends Seeder
                 ]);
             }
 
-            $startMonth->addMonth();
+            // Pindah ke hari berikutnya
+            $startDate->addDay();
         }
     }
 }

@@ -8,6 +8,7 @@ use App\Models\ParkingArea;
 use App\Models\VehicleType;
 use App\Models\ParkingRecord;
 use App\Models\Tarif;
+use App\Services\MqttService; // ✅ TAMBAHAN MQTT
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -29,13 +30,12 @@ class RecommendationController extends Controller
             ->orderBy('slot_code')
             ->get()
             ->map(function ($slot) {
-                // Ambil tarif dari vehicle type
                 $tarif = $slot->area->vehicleType->tarifs->first();
 
                 return [
                     'id' => $slot->id,
                     'slot_code' => $slot->slot_code,
-                    'status' => $slot->status, // empty, reserved, occupied
+                    'status' => $slot->status,
                     'distance_from_entry' => (int) $slot->distance_from_entry,
                     'last_update' => $slot->last_update,
                     'area_id' => $slot->area_id,
@@ -63,9 +63,8 @@ class RecommendationController extends Controller
         DB::beginTransaction();
 
         try {
-            $slot = ParkingSlot::with('area')->findOrFail($request->slot_id);
+            $slot = ParkingSlot::with('area.vehicleType')->findOrFail($request->slot_id);
 
-            // Validasi: hanya slot kosong yang bisa dipilih
             if ($slot->status !== 'empty') {
                 return response()->json([
                     'success' => false,
@@ -75,7 +74,6 @@ class RecommendationController extends Controller
 
             $tarif = Tarif::findOrFail($request->tarif_id);
 
-            // Validasi: tarif harus sesuai dengan vehicle type area
             if ($slot->area->vehicle_type_id && $tarif->vehicle_type_id !== $slot->area->vehicle_type_id) {
                 return response()->json([
                     'success' => false,
@@ -86,18 +84,33 @@ class RecommendationController extends Controller
             // Generate ticket code
             $ticketCode = 'TKT-' . now()->format('ymd') . '-' . strtoupper(Str::random(4));
 
-            // Buat parking record
+            // Simpan parking record
             ParkingRecord::create([
                 'tarif_id'         => $request->tarif_id,
-                'parking_slot_id'  => $slot->id, // SIMPAN SLOT ID
-                'ticket_code'      => $ticketCode,
-                'entry_time'       => now(),
-                'payment_status'   => 'unpaid',
-                'status'           => 'in'
+                'parking_slot_id' => $slot->id,
+                'ticket_code'     => $ticketCode,
+                'entry_time'      => now(),
+                'payment_status'  => 'unpaid',
+                'status'          => 'in'
             ]);
 
-            // Update status slot menjadi RESERVED
+            // Update slot
             $slot->update(['status' => 'reserved']);
+
+            // ===========================
+            // ✅ KIRIM DATA KE MQTT (ESP32)
+            // ===========================
+            $mqtt = new MqttService();
+            $mqtt->publish('parkir/slot/reserved', [
+                'ticket_code'   => $ticketCode,
+                'slot_code'     => $slot->slot_code,
+                'area'          => $slot->area->name,
+                'location'      => $slot->area->location,
+                'vehicle_type'  => $slot->area->vehicleType->name,
+                'tarif'         => $tarif->rate,
+                'status'        => 'reserved',
+                'time'          => now()->toDateTimeString(),
+            ]);
 
             DB::commit();
 
@@ -111,6 +124,7 @@ class RecommendationController extends Controller
                 'vehicle_type'  => $slot->area->vehicleType->name,
                 'tarif_rate'    => $tarif->rate,
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Select Slot Error: ' . $e->getMessage());

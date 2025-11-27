@@ -3,71 +3,55 @@
 namespace App\Http\Controllers\Officer;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\ParkingSlot;
 use App\Models\ParkingRecord;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    /**
-     * Tampilkan halaman dashboard petugas parkir.
-     */
     public function index()
     {
-        $user = Auth::user();
+        // ============================
+        // SLOT PARKIR REALTIME (FIXED)
+        // ============================
+        $slotTotal = ParkingSlot::count();
 
-        // ======================================
-        // STATISTIK UTAMA
-        // ======================================
+        $slotTerisi = ParkingRecord::where('status', 'in')
+            ->distinct('parking_slot_id')
+            ->count('parking_slot_id');
 
-        // Jumlah kendaraan yang sedang parkir (status = in)
-        $vehiclesParked = ParkingRecord::where('status', 'in')->count();
+        $slotKosong = $slotTotal - $slotTerisi;
 
-        // Kendaraan masuk hari ini
-        $vehiclesInToday = ParkingRecord::whereDate('entry_time', Carbon::today())->count();
-
-        // Kendaraan keluar hari ini
-        $vehiclesOutToday = ParkingRecord::whereDate('exit_time', Carbon::today())->count();
-
-        // Pembayaran pending (kendaraan masih parkir tapi unpaid)
-        $paymentPending = ParkingRecord::where('payment_status', 'unpaid')
-            ->where('status', 'in')
+        // ============================
+        // KENDARAAN HARI INI
+        // ============================
+        $kendaraanMasukHariIni = ParkingRecord::whereDate('entry_time', Carbon::today())
             ->count();
 
-        // Slot parkir terisi & kosong
-        $slotOccupied = ParkingSlot::where('status', 'occupied')->count();
-        $slotEmpty    = ParkingSlot::where('status', 'empty')->count();
-        $totalSlots   = ParkingSlot::count();
+        $kendaraanKeluarHariIni = ParkingRecord::whereDate('exit_time', Carbon::today())
+            ->count();
 
-        // ======================================
-        // DATA KENDARAAN TERBARU
-        // ======================================
+        // ============================
+        // KENDARAAN YANG MASIH DI DALAM
+        // ============================
+        $kendaraanDalamArea = ParkingRecord::where('status', 'in')->count();
 
-        // 5 kendaraan terakhir masuk
-        $recentIn = ParkingRecord::where('status', 'in')
-            ->orderBy('entry_time', 'desc')
-            ->take(5)
-            ->get();
-
-        // 5 kendaraan terakhir keluar
-        $recentOut = ParkingRecord::where('status', 'out')
-            ->orderBy('exit_time', 'desc')
-            ->take(5)
-            ->get();
+        // ============================
+        // DAFTAR PARKIR RECORD HARI INI
+        // ============================
+        $recordsHariIni = ParkingRecord::with(['parkingSlot.area', 'tarif.vehicleType'])
+            ->whereDate('entry_time', Carbon::today())
+            ->latest('entry_time')
+            ->paginate(10);
 
         return view('officer.dashboard', compact(
-            'user',
-            'vehiclesParked',
-            'vehiclesInToday',
-            'vehiclesOutToday',
-            'paymentPending',
-            'slotOccupied',
-            'slotEmpty',
-            'totalSlots',
-            'recentIn',
-            'recentOut'
+            'slotKosong',
+            'slotTerisi',
+            'slotTotal',
+            'kendaraanMasukHariIni',
+            'kendaraanKeluarHariIni',
+            'kendaraanDalamArea',
+            'recordsHariIni'
         ));
     }
 }

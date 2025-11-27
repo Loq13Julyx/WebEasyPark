@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="pagetitle">
-        <h1>Dashboard Petugas</h1>
+        <h1>Dashboard Officer</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('officer.dashboard') }}">Home</a></li>
@@ -13,70 +13,92 @@
 
     <section class="section dashboard">
 
-        {{-- ===================================
-             ROW 1 : STATISTIK UTAMA
-        =================================== --}}
+        {{-- ROW 1: STATISTIK --}}
         <div class="row">
 
-            {{-- KENDARAAN SEDANG PARKIR --}}
+            {{-- SLOT KOSONG --}}
             <div class="col-lg-3 col-md-6 col-12 mb-3">
-                <div class="card shadow border-0" style="border-left:6px solid #0d6efd;">
+                <div class="card shadow-sm border-0" style="border-left:5px solid #28a745;">
                     <div class="card-body py-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted mb-1">Sedang Parkir</h6>
-                                <h2 class="fw-bold mb-0">{{ $vehiclesParked }}</h2>
-                                <small class="text-muted">kendaraan</small>
+                                <h6 class="text-muted mb-1 small">Slot Kosong</h6>
+                                <h3 class="fw-bold mb-0 text-success">{{ $slotKosong }}/{{ $slotTotal }}</h3>
+                                <small class="text-muted">
+                                    <i class="bi bi-p-square"></i> slot parkir
+                                </small>
                             </div>
-                            <i class="bi bi-car-front" style="font-size: 2.5rem; color:#0d6efd;"></i>
+                            <div class="text-end">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-p-circle" style="font-size: 2rem; color: #28a745;"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- KENDARAAN MASUK HARI INI --}}
+            {{-- SLOT TERISI --}}
             <div class="col-lg-3 col-md-6 col-12 mb-3">
-                <div class="card shadow border-0" style="border-left:6px solid #20c997;">
+                <div class="card shadow-sm border-0" style="border-left:5px solid #dc3545;">
                     <div class="card-body py-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted mb-1">Masuk Hari Ini</h6>
-                                <h2 class="fw-bold mb-0">{{ $vehiclesInToday }}</h2>
-                                <small class="text-muted">kendaraan</small>
+                                <h6 class="text-muted mb-1 small">Slot Terisi</h6>
+                                <h3 class="fw-bold mb-0 text-danger">{{ $slotTerisi }}</h3>
+                                <small class="text-muted">
+                                    <i class="bi bi-car-front"></i> saat ini
+                                </small>
                             </div>
-                            <i class="bi bi-door-open" style="font-size: 2.5rem; color:#20c997;"></i>
+                            <div class="text-end">
+                                <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-car-front-fill" style="font-size: 2rem; color: #dc3545;"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- KENDARAAN KELUAR HARI INI --}}
+            {{-- KENDARAAN MASUK --}}
             <div class="col-lg-3 col-md-6 col-12 mb-3">
-                <div class="card shadow border-0" style="border-left:6px solid #dc3545;">
+                <div class="card shadow-sm border-0" style="border-left:5px solid #20c997;">
                     <div class="card-body py-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted mb-1">Keluar Hari Ini</h6>
-                                <h2 class="fw-bold mb-0">{{ $vehiclesOutToday }}</h2>
-                                <small class="text-muted">kendaraan</small>
+                                <h6 class="text-muted mb-1 small">Kendaraan Masuk</h6>
+                                <h3 class="fw-bold mb-0" style="color: #20c997;">{{ $kendaraanMasukHariIni }}</h3>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-day"></i> Hari ini
+                                </small>
                             </div>
-                            <i class="bi bi-door-closed" style="font-size: 2.5rem; color:#dc3545;"></i>
+                            <div class="text-end">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-arrow-down-circle-fill" style="font-size: 2rem; color: #20c997;"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- PEMBAYARAN PENDING --}}
+            {{-- KENDARAAN KELUAR --}}
             <div class="col-lg-3 col-md-6 col-12 mb-3">
-                <div class="card shadow border-0" style="border-left:6px solid #ffc107;">
+                <div class="card shadow-sm border-0" style="border-left:5px solid #fd7e14;">
                     <div class="card-body py-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted mb-1">Pembayaran Pending</h6>
-                                <h2 class="fw-bold mb-0">{{ $paymentPending }}</h2>
-                                <small class="text-muted">menunggu pembayaran</small>
+                                <h6 class="text-muted mb-1 small">Kendaraan Keluar</h6>
+                                <h3 class="fw-bold mb-0 text-warning">{{ $kendaraanKeluarHariIni }}</h3>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-day"></i> Hari ini
+                                </small>
                             </div>
-                            <i class="bi bi-hourglass-split" style="font-size: 2.5rem; color:#ffc107;"></i>
+                            <div class="text-end">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-arrow-up-circle-fill" style="font-size: 2rem; color: #fd7e14;"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,99 +106,134 @@
 
         </div>
 
+        {{-- ROW 2: DAFTAR PARKIR RECORD HARI INI --}}
+        <div class="row mt-2">
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-list-ul text-primary"></i>
+                                Daftar Parkir Hari Ini
+                            </h5>
+                            {{-- TOTAL SELURUH DATA --}}
+                            <span class="badge bg-primary">{{ $recordsHariIni->total() }} Record</span>
+                        </div>
+                    </div>
 
-        {{-- ===================================
-             ROW 2 : SLOT PARKIR
-        =================================== --}}
-        <div class="row">
-
-            {{-- SLOT TERPAKAI --}}
-            <div class="col-lg-6 mb-3">
-                <div class="card shadow-sm border-0" style="border-radius:12px;">
                     <div class="card-body">
-                        <h5 class="card-title mb-3"><i class="bi bi-p-circle"></i> Status Slot Parkir</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kode Tiket</th>
+                                        <th>Jenis Kendaraan</th>
+                                        <th>Slot Parkir</th>
+                                        <th>Area</th>
+                                        <th>Waktu Masuk</th>
+                                        <th>Waktu Keluar</th>
+                                        <th>Status</th>
+                                        <th>Pembayaran</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($recordsHariIni as $index => $record)
+                                        <tr>
+                                            {{-- NOMOR URUT TIDAK RESET --}}
+                                            <td>{{ $recordsHariIni->firstItem() + $index }}</td>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded"
-                            style="background:#f8f9fa; border-left: 4px solid #0d6efd;">
-                            <div>
-                                <h6 class="fw-bold">Slot Terisi</h6>
-                                <p class="text-muted mb-0">{{ $slotOccupied }} slot</p>
-                            </div>
+                                            <td>
+                                                <span class="badge bg-dark">{{ $record->ticket_code }}</span>
+                                            </td>
+
+                                            <td>
+                                                @if ($record->tarif && $record->tarif->vehicleType)
+                                                    <i
+                                                        class="bi bi-{{ $record->tarif->vehicleType->name == 'Motor' ? 'bicycle' : 'car-front' }}"></i>
+                                                    {{ $record->tarif->vehicleType->name }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->parkingSlot)
+                                                    <span class="badge bg-secondary">
+                                                        {{ $record->parkingSlot->slot_code }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->parkingSlot && $record->parkingSlot->area)
+                                                    {{ $record->parkingSlot->area->name }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->entry_time)
+                                                    <small>{{ \Carbon\Carbon::parse($record->entry_time)->format('H:i') }}</small>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->exit_time)
+                                                    <small>{{ \Carbon\Carbon::parse($record->exit_time)->format('H:i') }}</small>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->status == 'in')
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-arrow-down-circle"></i> Masuk
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-arrow-up-circle"></i> Keluar
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($record->payment_status == 'paid')
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle"></i> Lunas
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-clock"></i> Belum Bayar
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4">
+                                                <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                                                <span class="text-muted">Tidak ada data parkir hari ini</span>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center p-3 rounded"
-                            style="background:#f8f9fa; border-left: 4px solid #198754;">
-                            <div>
-                                <h6 class="fw-bold">Slot Kosong</h6>
-                                <p class="text-muted mb-0">{{ $slotEmpty }} slot dari {{ $totalSlots }} total</p>
-                            </div>
+                        {{-- PAGINATION --}}
+                        <div class="mt-3 d-flex justify-content-end">
+                            {{ $recordsHariIni->links() }}
                         </div>
-
                     </div>
                 </div>
             </div>
-
-            {{-- KENDARAAN MASUK TERBARU --}}
-            <div class="col-lg-6 mb-3">
-                <div class="card shadow-sm border-0" style="border-radius:12px;">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3"><i class="bi bi-clock-history"></i> Kendaraan Masuk Terbaru</h5>
-
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            @forelse($recentIn as $item)
-                                <div class="d-flex justify-content-between mb-3 p-3 rounded"
-                                    style="background:#f8f9fa; border-left:4px solid #0d6efd;">
-                                    <div>
-                                        <div class="fw-bold">{{ $item->ticket_code }}</div>
-                                        <div class="text-muted small">
-                                            {{ \Carbon\Carbon::parse($item->entry_time)->format('d M Y, H:i') }}
-                                        </div>
-                                    </div>
-                                    <span class="badge bg-primary">IN</span>
-                                </div>
-                            @empty
-                                <p class="text-center text-muted">Belum ada data</p>
-                            @endforelse
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-
-        {{-- ===================================
-             ROW 3 : KELUAR TERBARU
-        =================================== --}}
-        <div class="row">
-
-            <div class="col-lg-12 mb-3">
-                <div class="card shadow-sm border-0" style="border-radius:12px;">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3"><i class="bi bi-receipt"></i> Kendaraan Keluar Terbaru</h5>
-
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            @forelse($recentOut as $item)
-                                <div class="d-flex justify-content-between mb-3 p-3 rounded"
-                                    style="background:#f8f9fa; border-left:4px solid #198754;">
-                                    <div>
-                                        <div class="fw-bold">{{ $item->ticket_code }}</div>
-                                        <div class="text-muted small">
-                                            {{ \Carbon\Carbon::parse($item->exit_time)->format('d M Y, H:i') }}
-                                        </div>
-                                    </div>
-                                    <span class="badge bg-success">OUT</span>
-                                </div>
-                            @empty
-                                <p class="text-center text-muted">Belum ada data</p>
-                            @endforelse
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
         </div>
 
     </section>
