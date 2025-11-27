@@ -5,38 +5,48 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ParkingSlot;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class ParkingSlotController extends Controller
 {
     public function index()
     {
-        $slots = ParkingSlot::with('area')->get();
+        // Cache hasil selama 2 detik untuk mengurangi query
+        return Cache::remember('parking_slots_status', 2, function () {
+            // Auto-expire reserved slots yang lewat 3 menit
+            ParkingSlot::where('status', 'reserved')
+                ->where('last_update', '<', now()->subMinutes(3))
+                ->update([
+                    'status' => 'empty',
+                    'last_update' => now()
+                ]);
 
-        $data = $slots->map(function ($slot) {
-            $status = $slot->status;
+            $slots = ParkingSlot::select('slot_code', 'status', 'last_update', 'distance_from_entry')
+                ->get();
 
-            return [
-                'slot_code'     => $slot->slot_code,
-                'area'          => $slot->area->name ?? null,
-                'status'        => $status,
-                'status_label'  => match($status) {
-                    'occupied' => 'terisi',
-                    'empty'    => 'kosong',
-                    'inactive' => 'unknown',
-                    default    => 'unknown'
-                },
-                'color'         => match($status) {
-                    'occupied' => 'red',
-                    'empty'    => 'green',
-                    'inactive' => 'gray',
-                    default    => 'gray'
-                },
-                'distance_from_entry' => $slot->distance_from_entry,
-                'last_update'   => $slot->last_update,
-            ];
+            return $slots->map(function ($slot) {
+                $status = $slot->status;
+
+                return [
+                    'slot_code'     => $slot->slot_code,
+                    'status'        => $status,
+                    'status_label'  => match($status) {
+                        'occupied' => 'terisi',
+                        'empty'    => 'kosong',
+                        'reserved' => 'reserved',
+                        default    => 'kosong'
+                    },
+                    'color'         => match($status) {
+                        'occupied' => 'red',
+                        'empty'    => 'green',
+                        'reserved' => 'yellow',
+                        default    => 'green'
+                    },
+                    'last_update'   => $slot->last_update,
+                ];
+            })->toArray();
         });
-
-        return response()->json($data);
     }
 
     public function updateStatus(Request $request, $slotCode)
@@ -48,13 +58,37 @@ class ParkingSlotController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:occupied,empty,inactive'
+            'status' => 'required|in:occupied,empty,reserved'
         ]);
 
-        $slot->update([
-            'status' => $request->status,
-            'last_update' => now(),
-        ]);
+        // PERUBAHAN: Reserved langsung bisa jadi occupied tanpa cek timeout
+        if ($slot->status === 'reserved' && $request->status === 'occupied') {
+            // Langsung update ke occupied (mobil sudah parkir)
+            $slot->update([
+                'status' => 'occupied',
+                'last_update' => now(),
+            ]);
+        }
+        // Cek timeout hanya untuk status selain occupied
+        elseif ($slot->status === 'reserved' && $request->status !== 'occupied') {
+            $last = Carbon::parse($slot->last_update);
+            if ($last->diffInMinutes(now()) < 3) {
+                return response()->json(['message' => 'Slot is reserved'], 400);
+            }
+            
+            $slot->update([
+                'status' => $request->status,
+                'last_update' => now(),
+            ]);
+        }
+        else {
+            $slot->update([
+                'status' => $request->status,
+                'last_update' => now(),
+            ]);
+        }
+
+        Cache::forget('parking_slots_status');
 
         return response()->json([
             'message' => 'Status updated',
@@ -68,40 +102,65 @@ class ParkingSlotController extends Controller
             'slots' => 'required|array'
         ]);
 
-        // Mapping status dari front-end / kamera
         $map = [
             'kosong'  => 'empty',
             'terisi'  => 'occupied',
-            'unknown' => 'inactive',
+            'unknown' => 'empty',
             'empty'   => 'empty',
             'occupied'=> 'occupied',
-            'inactive'=> 'inactive'
+            'reserved'=> 'reserved'
         ];
 
         $updatedSlots = [];
+        $now = now();
+        $stats = ['kosong' => 0, 'terisi' => 0, 'reserved' => 0];
 
         foreach ($request->slots as $slotCode => $status) {
+            $dbStatus = $map[$status] ?? 'empty';
 
             $slot = ParkingSlot::where('slot_code', $slotCode)->first();
             if (!$slot) continue;
 
-            $dbStatus = $map[$status] ?? 'inactive';
+            // PERUBAHAN: Reserved langsung jadi occupied jika terdeteksi terisi
+            if ($slot->status === 'reserved') {
+                if ($dbStatus === 'occupied') {
+                    // Langsung override: reserved -> occupied (mobil datang)
+                    $dbStatus = 'occupied';
+                } elseif ($dbStatus === 'empty') {
+                    // Cek timeout untuk empty
+                    $last = Carbon::parse($slot->last_update);
+                    if ($last->diffInMinutes($now) < 3) {
+                        $dbStatus = 'reserved'; // Masih reserved
+                    } else {
+                        $dbStatus = 'empty'; // Timeout, jadi empty
+                    }
+                }
+            }
 
             $slot->update([
                 'status' => $dbStatus,
-                'last_update' => now(),
+                'last_update' => $now,
             ]);
 
             $updatedSlots[$slotCode] = $dbStatus;
+
+            // Count stats
+            if ($dbStatus === 'empty') $stats['kosong']++;
+            if ($dbStatus === 'occupied') $stats['terisi']++;
+            if ($dbStatus === 'reserved') $stats['reserved']++;
         }
 
+        Cache::forget('parking_slots_status');
+
         return response()->json([
-            'message' => 'All slots updated successfully',
-            'updated' => $updatedSlots
+            'success' => true,
+            'message' => 'Slots updated',
+            'updated' => $updatedSlots,
+            'stats' => $stats,
+            'timestamp' => now()->toIso8601String()
         ]);
     }
 
-    // Fungsi khusus update dari kamera
     public function updateFromCamera(Request $request)
     {
         $request->validate([
@@ -111,27 +170,93 @@ class ParkingSlotController extends Controller
         $map = [
             'kosong'  => 'empty',
             'terisi'  => 'occupied',
-            'unknown' => 'inactive'
+            'reserved'=> 'reserved',
+            'unknown' => 'empty'
         ];
 
         $updatedSlots = [];
+        $now = now();
 
         foreach ($request->slots as $slotCode => $status) {
+            $dbStatus = $map[$status] ?? 'empty';
+            
+            $slot = ParkingSlot::where('slot_code', $slotCode)->first();
+            if (!$slot) continue;
 
-            $dbStatus = $map[$status] ?? 'inactive';
-
-            ParkingSlot::where('slot_code', $slotCode)
-                ->update([
-                    'status' => $dbStatus,
-                    'last_update' => now()
+            // PERUBAHAN: Reserved langsung jadi occupied jika kamera deteksi terisi
+            if ($slot->status === 'reserved' && $dbStatus === 'occupied') {
+                // Langsung update ke occupied tanpa cek timeout
+                $slot->update([
+                    'status' => 'occupied',
+                    'last_update' => $now
                 ]);
-
-            $updatedSlots[$slotCode] = $dbStatus;
+            } else {
+                $slot->update([
+                    'status' => $dbStatus,
+                    'last_update' => $now
+                ]);
+            }
+            
+            $updatedSlots[$slotCode] = $slot->status;
         }
+
+        Cache::forget('parking_slots_status');
 
         return response()->json([
             'message' => 'Slot update success',
             'updated' => $updatedSlots
+        ]);
+    }
+
+    public function reserveSlot(Request $request, $slotCode)
+    {
+        $slot = ParkingSlot::where('slot_code', $slotCode)->first();
+
+        if (!$slot) {
+            return response()->json(['message' => 'Slot not found'], 404);
+        }
+
+        if ($slot->status !== 'empty') {
+            return response()->json([
+                'message' => 'Slot tidak tersedia',
+                'current_status' => $slot->status
+            ], 400);
+        }
+
+        $slot->update([
+            'status' => 'reserved',
+            'last_update' => now()
+        ]);
+
+        Cache::forget('parking_slots_status');
+
+        return response()->json([
+            'message' => 'Slot berhasil dipesan untuk 3 menit',
+            'slot' => $slot,
+            'expires_at' => now()->addMinutes(3)->toIso8601String()
+        ]);
+    }
+
+    public function cancelReservation(Request $request, $slotCode)
+    {
+        $slot = ParkingSlot::where('slot_code', $slotCode)
+            ->where('status', 'reserved')
+            ->first();
+
+        if (!$slot) {
+            return response()->json(['message' => 'No active reservation'], 404);
+        }
+
+        $slot->update([
+            'status' => 'empty',
+            'last_update' => now()
+        ]);
+
+        Cache::forget('parking_slots_status');
+
+        return response()->json([
+            'message' => 'Reservation cancelled',
+            'slot' => $slot
         ]);
     }
 }
