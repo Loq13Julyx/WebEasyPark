@@ -10,11 +10,15 @@ class ParkingSlot extends Model
     use HasFactory;
 
     protected $fillable = [
-        'area_id',             
+        'area_id',
         'slot_code',
         'status',
         'distance_from_entry',
         'last_update',
+    ];
+
+    protected $casts = [
+        'last_update' => 'datetime',
     ];
 
     /**
@@ -31,13 +35,5 @@ class ParkingSlot extends Model
     public function parkingRecords()
     {
         return $this->hasMany(ParkingRecord::class, 'parking_slot_id');
-    }
-
-    /**
-     * Relasi ke vehicle types (opsional)
-     */
-    public function vehicleType()
-    {
-        return $this->belongsTo(VehicleType::class, 'vehicle_type_id');
     }
 }

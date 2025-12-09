@@ -8,11 +8,12 @@ use App\Models\ParkingArea;
 use App\Models\VehicleType;
 use App\Models\ParkingRecord;
 use App\Models\Tarif;
-use App\Services\MqttService; // ✅ TAMBAHAN MQTT
+use App\Services\MqttService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class RecommendationController extends Controller
 {
@@ -56,14 +57,16 @@ class RecommendationController extends Controller
     public function selectSlot(Request $request)
     {
         $request->validate([
-            'slot_id' => 'required|exists:parking_slots,id',
+            'slot_id'  => 'required|exists:parking_slots,id',
             'tarif_id' => 'required|exists:tarifs,id'
         ]);
 
         DB::beginTransaction();
 
         try {
-            $slot = ParkingSlot::with('area.vehicleType')->findOrFail($request->slot_id);
+            $slot = ParkingSlot::with('area.vehicleType')
+                ->lockForUpdate()
+                ->findOrFail($request->slot_id);
 
             if ($slot->status !== 'empty') {
                 return response()->json([
@@ -74,57 +77,68 @@ class RecommendationController extends Controller
 
             $tarif = Tarif::findOrFail($request->tarif_id);
 
-            if ($slot->area->vehicle_type_id && $tarif->vehicle_type_id !== $slot->area->vehicle_type_id) {
+            if (
+                $slot->area->vehicle_type_id &&
+                $tarif->vehicle_type_id !== $slot->area->vehicle_type_id
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Tarif tidak sesuai dengan tipe kendaraan area parkir!'
                 ], 400);
             }
 
-            // Generate ticket code
+            // =========================
+            // ✅ GENERATE TICKET CODE
+            // =========================
             $ticketCode = 'TKT-' . now()->format('ymd') . '-' . strtoupper(Str::random(4));
 
-            // Simpan parking record
+            // =========================
+            // ✅ SIMPAN PARKING RECORD
+            // =========================
             ParkingRecord::create([
                 'tarif_id'         => $request->tarif_id,
                 'parking_slot_id' => $slot->id,
                 'ticket_code'     => $ticketCode,
                 'entry_time'      => now(),
-                'payment_status'  => 'unpaid',
+                'payment_status' => 'unpaid',
                 'status'          => 'in'
             ]);
 
-            // Update slot
-            $slot->update(['status' => 'reserved']);
+            // =========================
+            // ✅ UPDATE SLOT (TANPA TIMEOUT)
+            // =========================
+            $slot->update([
+                'status'      => 'reserved',
+                'last_update' => now()
+            ]);
 
-            // ===========================
-            // ✅ KIRIM DATA KE MQTT (ESP32)
-            // ===========================
+            // =========================
+            // ✅ KIRIM KE MQTT (ESP32) TANPA EXPIRED
+            // =========================
             $mqtt = new MqttService();
             $mqtt->publish('parkir/slot/reserved', [
-                'ticket_code'   => $ticketCode,
-                'slot_code'     => $slot->slot_code,
-                'area'          => $slot->area->name,
-                'location'      => $slot->area->location,
-                'vehicle_type'  => $slot->area->vehicleType->name,
-                'tarif'         => $tarif->rate,
-                'status'        => 'reserved',
-                'time'          => now()->toDateTimeString(),
+                'ticket_code'  => $ticketCode,
+                'slot_code'    => $slot->slot_code,
+                'area'         => $slot->area->name,
+                'location'     => $slot->area->location,
+                'vehicle_type' => $slot->area->vehicleType->name,
+                'tarif'        => $tarif->rate,
+                'status'       => 'reserved',
+                'time'         => now()->toDateTimeString(),
             ]);
 
             DB::commit();
 
             return response()->json([
-                'success'       => true,
-                'message'       => 'Slot berhasil dipesan!',
-                'ticket_code'   => $ticketCode,
-                'slot_code'     => $slot->slot_code,
-                'area_name'     => $slot->area->name,
+                'success'        => true,
+                'message'        => 'Slot berhasil dipesan!',
+                'ticket_code'    => $ticketCode,
+                'slot_code'      => $slot->slot_code,
+                'area_name'      => $slot->area->name,
                 'area_location' => $slot->area->location,
                 'vehicle_type'  => $slot->area->vehicleType->name,
                 'tarif_rate'    => $tarif->rate,
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Select Slot Error: ' . $e->getMessage());

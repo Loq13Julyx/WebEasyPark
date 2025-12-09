@@ -19,6 +19,31 @@
                     <h5 class="card-title mb-0">Daftar Kendaraan Sedang Parkir</h5>
                 </div>
 
+                {{-- ✅ FILTER KODE TIKET --}}
+                <form method="GET" action="{{ route('officer.parking-exit.index') }}" class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Cari berdasarkan kode tiket..."
+                            value="{{ request('search') }}"
+                        >
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                    </div>
+                    @if(request('search'))
+                        <div class="col-md-2">
+                            <a href="{{ route('officer.parking-exit.index') }}" class="btn btn-secondary w-100">
+                                Reset
+                            </a>
+                        </div>
+                    @endif
+                </form>
+
                 {{-- Tabel daftar kendaraan --}}
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -94,8 +119,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="text-center text-muted">Tidak ada kendaraan yang sedang
-                                        parkir.</td>
+                                    <td colspan="10" class="text-center text-muted">
+                                        Tidak ada kendaraan yang sedang parkir.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

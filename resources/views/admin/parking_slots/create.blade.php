@@ -97,6 +97,12 @@
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+
+                        {{-- Info timeout otomatis --}}
+                        <div id="reserved-info" class="form-text text-warning d-none mt-1">
+                            Jika memilih <strong>Reserved</strong>, sistem akan mengatur
+                            <strong>timeout otomatis 10 menit</strong>.
+                        </div>
                     </div>
 
                 </div>
@@ -115,4 +121,22 @@
         </div>
     </div>
 </section>
+@endsection
+
+@section('scripts')
+<script>
+    const statusSelect = document.getElementById('status');
+    const reservedInfo = document.getElementById('reserved-info');
+
+    function toggleReservedInfo() {
+        if (statusSelect.value === 'reserved') {
+            reservedInfo.classList.remove('d-none');
+        } else {
+            reservedInfo.classList.add('d-none');
+        }
+    }
+
+    statusSelect.addEventListener('change', toggleReservedInfo);
+    toggleReservedInfo(); // trigger on load (untuk old value)
+</script>
 @endsection

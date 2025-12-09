@@ -33,9 +33,9 @@ class ParkingSlotSeeder extends Seeder
         if ($areaAId) {
             foreach ($distanceMap as $num => $distance) {
                 $data[] = [
-                    'area_id'             => $areaAId,
-                    'slot_code'           => "A{$num}",
-                    'status'              => 'empty',
+                    'area_id'              => $areaAId,
+                    'slot_code'            => "A{$num}",
+                    'status'               => 'empty',
                     'distance_from_entry' => $distance,
                     'last_update'         => $now,
                     'created_at'          => $now,
@@ -50,9 +50,9 @@ class ParkingSlotSeeder extends Seeder
         if ($areaBId) {
             foreach ($distanceMap as $num => $distance) {
                 $data[] = [
-                    'area_id'             => $areaBId,
-                    'slot_code'           => "B{$num}",
-                    'status'              => 'empty',
+                    'area_id'              => $areaBId,
+                    'slot_code'            => "B{$num}",
+                    'status'               => 'empty',
                     'distance_from_entry' => $distance,
                     'last_update'         => $now,
                     'created_at'          => $now,

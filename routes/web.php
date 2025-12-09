@@ -59,10 +59,15 @@ Route::middleware(['auth', 'roleWeb:admin'])->prefix('admin')->name('admin.')->g
 // ========================================================================
 // 🔹 PETUGAS ROUTES
 // ========================================================================
-Route::middleware(['auth', 'roleWeb:officer'])->prefix('officer')->name('officer.')->group(function () {
+// Di dalam Route::middleware(['auth', 'roleWeb:officer'])
+Route::prefix('officer')->name('officer.')->group(function () {
 
     Route::get('dashboard', [OfficerDashboardController::class, 'index'])
         ->name('dashboard');
+
+    // ✅ TAMBAHKAN INI
+    Route::post('dashboard/load-data', [OfficerDashboardController::class, 'loadData'])
+        ->name('dashboard.loadData');
 
     Route::get('parking-exit', [ParkingExitController::class, 'index'])
         ->name('parking-exit.index');

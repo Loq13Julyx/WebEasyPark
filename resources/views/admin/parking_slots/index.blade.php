@@ -32,6 +32,7 @@
                                 <th>Kode Slot</th>
                                 <th>Jarak dari Pintu Masuk (m)</th>
                                 <th>Status</th>
+                                <th>Info Reservasi</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -41,6 +42,7 @@
                                     <td>{{ $slots->firstItem() + $index }}</td>
                                     <td>{{ $slot->area->name ?? '-' }}</td>
                                     <td class="fw-semibold">{{ $slot->slot_code }}</td>
+
                                     <td>
                                         {{ $slot->distance_from_entry !== null ? intval($slot->distance_from_entry) . ' m' : '-' }}
                                     </td>
@@ -58,15 +60,36 @@
                                         @endif
                                     </td>
 
+                                    {{-- INFO RESERVASI --}}
+                                    <td>
+                                        @if ($slot->status === 'reserved' && $slot->reservation_expires_at)
+                                            <div class="small">
+                                                <div>
+                                                    ⏳ Sisa:
+                                                    <strong>
+                                                        {{ now()->diffInMinutes($slot->reservation_expires_at, false) }} menit
+                                                    </strong>
+                                                </div>
+                                                <div>
+                                                    👤 Oleh:
+                                                    {{ $slot->reservedBy->name ?? 'User #' . $slot->reserved_by }}
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+
+                                    {{-- AKSI --}}
                                     <td class="text-center">
                                         <a href="{{ route('admin.parking-slots.edit', $slot->id) }}"
                                             class="btn btn-sm btn-warning" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <button type="button" 
+                                        <button type="button"
                                             class="btn btn-sm btn-danger btn-delete"
-                                            data-id="{{ $slot->id }}" 
+                                            data-id="{{ $slot->id }}"
                                             title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -74,7 +97,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">
+                                    <td colspan="7" class="text-center text-muted">
                                         Belum ada data slot parkir.
                                     </td>
                                 </tr>

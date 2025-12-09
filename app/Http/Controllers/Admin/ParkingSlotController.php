@@ -46,18 +46,20 @@ class ParkingSlotController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'area_id'             => 'required|exists:parking_areas,id',
-            'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code',
-            'status'              => 'required|in:empty,reserved,occupied',
+            'area_id'   => 'required|exists:parking_areas,id',
+            'slot_code' => 'required|string|max:10|unique:parking_slots,slot_code,NULL,id,area_id,' . $request->area_id,
+            'status'    => 'required|in:empty,reserved,occupied',
             'distance_from_entry' => 'nullable|numeric|min:0',
         ]);
 
-        ParkingSlot::create([
-            'area_id'             => $request->area_id,
-            'slot_code'           => strtoupper($request->slot_code),
-            'status'              => $request->status,
+        $data = [
+            'area_id'   => $request->area_id,
+            'slot_code' => strtoupper($request->slot_code),
+            'status'    => $request->status,
             'distance_from_entry' => $request->distance_from_entry,
-        ]);
+        ];
+
+        ParkingSlot::create($data);
 
         return redirect()->route('admin.parking-slots.index')
             ->with('success', 'Slot parkir berhasil ditambahkan.');
@@ -78,18 +80,20 @@ class ParkingSlotController extends Controller
     public function update(Request $request, ParkingSlot $parking_slot)
     {
         $request->validate([
-            'area_id'             => 'required|exists:parking_areas,id',
-            'slot_code'           => 'required|string|max:10|unique:parking_slots,slot_code,' . $parking_slot->id,
-            'status'              => 'required|in:empty,reserved,occupied',
+            'area_id'   => 'required|exists:parking_areas,id',
+            'slot_code' => 'required|string|max:10|unique:parking_slots,slot_code,' . $parking_slot->id . ',id,area_id,' . $request->area_id,
+            'status'    => 'required|in:empty,reserved,occupied',
             'distance_from_entry' => 'nullable|numeric|min:0',
         ]);
 
-        $parking_slot->update([
-            'area_id'             => $request->area_id,
-            'slot_code'           => strtoupper($request->slot_code),
-            'status'              => $request->status,
+        $data = [
+            'area_id'   => $request->area_id,
+            'slot_code' => strtoupper($request->slot_code),
+            'status'    => $request->status,
             'distance_from_entry' => $request->distance_from_entry,
-        ]);
+        ];
+
+        $parking_slot->update($data);
 
         return redirect()->route('admin.parking-slots.index')
             ->with('success', 'Data slot parkir berhasil diperbarui.');

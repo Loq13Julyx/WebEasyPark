@@ -7,25 +7,42 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        /**
+         * ============================
+         * VEHICLE TYPES
+         * ============================
+         */
         Schema::create('vehicle_types', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
             $table->timestamps();
         });
 
+        /**
+         * ============================
+         * PARKING AREAS
+         * ============================
+         */
         Schema::create('parking_areas', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100);
             $table->string('location', 150)->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+
             $table->foreignId('vehicle_type_id')
                 ->nullable()
                 ->constrained('vehicle_types')
                 ->nullOnDelete()
                 ->comment('Tipe kendaraan utama area parkir');
+
             $table->timestamps();
         });
 
+        /**
+         * ============================
+         * PARKING SLOTS (TANPA TIMEOUT ✅)
+         * ============================
+         */
         Schema::create('parking_slots', function (Blueprint $table) {
             $table->id();
 
@@ -38,7 +55,9 @@ return new class extends Migration {
             $table->enum('status', ['empty', 'reserved', 'occupied'])
                 ->default('empty');
 
-            $table->timestamp('reserved_at')->nullable();
+            // ✅ TANPA reserved_at
+            // ✅ TANPA reservation_expires_at
+            // ✅ TANPA reserved_by
 
             $table->decimal('distance_from_entry', 6, 2)->nullable();
 
@@ -51,15 +70,28 @@ return new class extends Migration {
             $table->unique(['area_id', 'slot_code']);
         });
 
+        /**
+         * ============================
+         * TARIFS
+         * ============================
+         */
         Schema::create('tarifs', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('vehicle_type_id')
                 ->constrained('vehicle_types')
                 ->onDelete('cascade');
+
             $table->decimal('rate', 10, 2)->default(0);
+
             $table->timestamps();
         });
 
+        /**
+         * ============================
+         * PARKING RECORDS
+         * ============================
+         */
         Schema::create('parking_records', function (Blueprint $table) {
             $table->id();
 
